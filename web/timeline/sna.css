@@ -1,0 +1,135 @@
+body {
+  margin:0;
+  background:#f9f9f9;
+  width: 100%;
+  height: 100%;
+  font: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
+}
+
+.bg-dark {
+  background-color: #1A2330 !important;
+}
+
+#viewport {
+  width: 100%;
+  height: 500px;
+  display: block;
+}
+
+.jumbotron {
+  position: relative;
+  padding: 0 !important;
+  opacity: 0;
+}
+
+.filter {
+	position: absolute;
+	right: 150px;
+	bottom: 50px;
+}
+
+p {
+  font-size: 14pt;
+}
+
+small {
+}
+
+.name {
+	border-bottom: solid 1px #1A2330;
+  opacity: 0;
+}
+
+.title {
+}
+
+.content {
+  opacity: 0;
+}
+
+.card {
+  margin: 10px;
+  opacity: 0;
+}
+
+.description {
+  font-size: 14pt;
+}
+
+.toast {
+  opacity: 1;
+	z-index: 1;
+}
+
+.edu-item:nth-child(1) .toast:after {
+	content: '';
+	width: 40px;
+	height: 1px;
+	border-bottom: solid 3px #1A2330;
+	position: absolute;
+	right: -24px;
+	z-index: -1;
+	top: 10px;
+}
+
+.edu-item:nth-child(2) .toast:after {
+	content: '';
+	width: 40px;
+	height: 1px;
+	border-bottom: solid 3px #1A2330;
+	position: absolute;
+	right: -24px;
+	z-index: -1;
+	top: 10px;
+}
+
+.edu-item:nth-last-child() .toast:after {
+	display: none;
+}
+
+.edu-item {
+  opacity: 0;
+  margin: 10px 0 10px 0;
+}
+
+.shown {
+	-webkit-animation: fadeIn 0.75s ease forwards;
+	animation: fadeIn 0.75s ease forwards;
+}
+
+@-webkit-keyframes fadeIn {
+	0% { }
+	100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+	0% { }
+	100% { opacity: 1; }
+}
+
+.loading {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+}
+
+.hidden {
+	-webkit-animation: fadeOut 0.75s ease forwards;
+	animation: fadeOut 0.75s ease forwards;
+}
+
+@-webkit-keyframes fadeOut {
+	0% { }
+	100% { opacity: 0; }
+}
+
+@keyframes fadeOut {
+	0% { }
+	100% { opacity: 0; }
+}
+
+footer {
+  opacity: 0;
+}

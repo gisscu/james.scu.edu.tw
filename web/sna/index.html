@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>徐震網站 - 關係圖</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../lib/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="../lib/css/jumbotron.css" rel="stylesheet">
+    <link rel="stylesheet" href="sna.css" type="text/css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">徐震網站</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="../timeline/">年表</a>
+					</li>
+					<li class="nav-item active">
+						<a class="nav-link" href="../sna/">關係圖<span class="sr-only">(current)</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="../gallery/">畫廊</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="../tags/">文字雲</a>
+					</li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+          <input class="form-control mr-sm-2 typeahead-name search-input" type="text" placeholder="請輸入人名" aria-label="Search">
+        </form>
+				<div class="dropdown">
+					<button id="dLabel" class="btn btn-outline-info search-btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						進階搜尋
+					</button>
+					<form class="dropdown-menu dropdown-menu-right dropdown-adv" aria-labelledby="dLabel">
+						<div class="form-group">
+							<label for="school">學校</label>
+							<input type="text" class="form-control typeahead-school search-input" id="school">
+						</div>
+						<div class="form-group">
+							<label for="major">系所</label>
+							<input type="text" class="form-control typeahead-major search-input" id="major">
+						</div>
+						<div class="form-group">
+							<label for="major">畢業年</label>
+							<input type="number" class="form-control typeahead-year search-input" id="year">
+						</div>
+						<button id="search-adv" type="button" class="btn btn-outline-primary search-btn">搜尋</button>
+						<button id="search-clr" type="button" class="btn btn-outline-warning float-right search-btn">清除</button>
+					</form>
+				</div>
+      </div>
+    </nav>
+
+    <main role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="loading">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <div class="jumbotron hidden">
+        <canvas id="viewport"></canvas>
+      </div>
+
+      <div class="container">
+        <!-- <button id="child" type="button" class="float-right btn btn-outline-warning mr-2">桃李</button> -->
+				<!-- <div class="btn-group float-right mr-2"> -->
+					<!-- <button id="source" type="button" class="btn btn-outline-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
+						<!-- 朔源 -->
+					<!-- </button> -->
+					<!-- <div class="dropdown-menu"> -->
+						<!-- <a id="source1" class="dropdown-item" href="#">徐震</a> -->
+						<!-- <a id="source2" class="dropdown-item" href="#">其他人</a> -->
+					<!-- </div> -->
+				<!-- </div> -->
+        <!-- <h1 class="name"> -->
+        <!-- </h1> -->
+        <!-- <div class="row"> -->
+          <!-- <div class="col-md-4"> -->
+            <!-- <div class="toast edu-item" role="alert" aria-live="assertive" aria-atomic="true"> -->
+              <!-- <div class="toast-header"> -->
+                <!-- <strong class="mr-auto title"></strong> -->
+                <!-- <small class="year"></small> -->
+              <!-- </div> -->
+              <!-- <div class="toast-body content"></div> -->
+            <!-- </div> -->
+          <!-- </div> -->
+          <!-- <div class="col-md-8 callout callout-info description content"> -->
+          <!-- </div> -->
+        <!-- </div> -->
+
+      </div> <!-- /container -->
+
+    </main>
+
+    <footer class="container hidden">
+      <p>&copy; Company 2020</p>
+    </footer>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="../lib/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+  <script src="./bootstrap3-typeahead.min.js"></script>
+
+  <script src="../lib/js/arbor.js"></script>
+  <script src="../lib/js/arbor-tween.js"></script>
+  <script src="../lib/js/arbor-graphics.js"></script>
+
+  <script src="../lib/js/jsgraphs.js"></script>
+  <script src="../lib/js/kit.js"></script>
+  <script src="./search.js"></script>
+  <script src="./sna.js"></script>
+</html>
