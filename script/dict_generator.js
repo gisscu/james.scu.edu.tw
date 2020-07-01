@@ -24,7 +24,7 @@ const SCOPES = [
 
 const TOKEN_PATH = 'token.json'
 
-console.log(`pdf max length: ${process.argv[2]}`)
+// console.log(`pdf max length: ${process.argv[2]}`)
 authorize(api)
 
 async function sleep(ms = 0) {
@@ -180,9 +180,9 @@ async function api(auth) {
 
         row.jieba_tags = tag.toString()
         // row.content = sampleText.text
-        let max = parseInt(process.argv[2])
-        if (isNaN(max)) max = 300
-        row.content = fullText.text.substring(0, max)
+        // let max = parseInt(process.argv[2])
+        // if (isNaN(max)) max = 300
+        // row.content = fullText.text.substring(0, max)
       }
 
       await row.save()

@@ -27,6 +27,7 @@ const SCOPES = [
 const TOKEN_PATH = 'token.json'
 
 console.log(`pdf max length: ${process.argv[2]}`)
+console.log(`update image mode: ${process.argv[3]}`)
 authorize(api)
 
 async function sleep(ms = 0) {
@@ -160,7 +161,7 @@ async function api(auth) {
       let file = res.data
       let fileMeta = res.mimeType
 
-      if (file && fileMeta.match('image')) {
+      if (file && fileMeta.match('image') && process.argv[3] === '1') {
         let thumbnailName = `./thumbnail/${fileId}.jpg`
         try {
           await sharp(file).resize({
@@ -183,7 +184,7 @@ async function api(auth) {
           console.log(err)
         }
       } else if (file && fileMeta.match('pdf')) {
-        await write('./map.json', '{}')
+        // await write('./map.json', '{}')
 
         let fullText = await pdf(file)
 
@@ -191,18 +192,18 @@ async function api(auth) {
           // max: 1,
         // })
 
-        await write('./word', fullText.text)
-        await func('python3 jiebapy.py')
+        // await write('./word', fullText.text)
+        // await func('python3 jiebapy.py')
 
-        let map = await read('./map.json')
-        map = JSON.parse(map)
+        // let map = await read('./map.json')
+        // map = JSON.parse(map)
 
-        let tag = []
-        for (let key in map) {
-          tag.push(key)
-        }
+        // let tag = []
+        // for (let key in map) {
+          // tag.push(key)
+        // }
 
-        row.jieba_tags = tag.toString()
+        // row.jieba_tags = tag.toString()
         // row.content = sampleText.text
         let max = parseInt(process.argv[2])
         if (isNaN(max)) max = 300
