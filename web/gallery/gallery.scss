@@ -78,6 +78,7 @@ body {
   min-height: auto;
 
   > .grid-content {
+    height: 100%;
     writing-mode: vertical-lr;
     font-family: 'DFKai-sb';
     text-orientation: upright;
@@ -199,6 +200,7 @@ footer {
 
 
 .gallery-content {
+  display: flex-root;
   margin: 0 5px 5px 0;
   width: auto;
   max-width: calc(75% - 5px);
@@ -225,6 +227,7 @@ footer {
   position: relative;
 
   writing-mode: vertical-lr;
+  height: 100%;
   font-family: 'DFKai-sb';
   text-orientation: upright;
   padding-top: 20px;
@@ -251,6 +254,10 @@ footer {
 
 .container-fluid {
   padding: 5px;
+}
+
+.grid-item-w {
+  width: calc(50% - 10px) !important;
 }
 
 .grid-item {
