@@ -41,9 +41,15 @@
 
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-					<li class="nav-item">
-						<a class="nav-link" href="../timeline/">年表</a>
-					</li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="../timeline/" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              年表
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <a class="dropdown-item" href="../timeline/#0">徐震史</a>
+              <a class="dropdown-item" href="../timeline/#1">社工史</a>
+            </div>
+          </li>
 					<li class="nav-item">
 						<a class="nav-link" href="../sna/">關係圖</a>
 					</li>
@@ -71,10 +77,6 @@
       <div id="tags"></div>
 
     </main>
-
-    <footer class="container">
-      <p>&copy; Company 2019</p>
-    </footer>
   </body>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="../lib/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>

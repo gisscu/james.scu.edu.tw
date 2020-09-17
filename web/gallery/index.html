@@ -30,7 +30,6 @@
       }
     </style>
     <!-- Custom styles for this template -->
-		<link href="../lib/css/jumbotron.css" rel="stylesheet">
     <link rel="stylesheet" href="gallery.css" type="text/css">
   </head>
   <body>
@@ -42,9 +41,15 @@
 
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-					<li class="nav-item">
-						<a class="nav-link" href="../timeline/">年表</a>
-					</li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="../timeline/" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              年表
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <a class="dropdown-item" href="../timeline/#0">徐震史</a>
+              <a class="dropdown-item" href="../timeline/#1">社工史</a>
+            </div>
+          </li>
 					<li class="nav-item">
 						<a class="nav-link" href="../sna/">關係圖</a>
 					</li>
@@ -56,27 +61,20 @@
 					</li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2 typeahead-name search-input" type="text" placeholder="請輸入關鍵字" aria-label="Search">
+          <input class="form-control mr-sm-2 typeahead-title search-input" type="text" placeholder="請輸入標題" aria-label="Search">
         </form>
 				<div class="dropdown">
 					<button id="dLabel" class="btn btn-outline-info search-btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						進階搜尋
 					</button>
 					<form class="dropdown-menu dropdown-menu-right dropdown-adv" aria-labelledby="dLabel">
-						<!-- <div class="form-group"> -->
-							<!-- <label for="school">學校</label> -->
-							<!-- <input type="text" class="form-control typeahead-school" id="school"> -->
-						<!-- </div> -->
-						<!-- <div class="form-group"> -->
-							<!-- <label for="major">系所</label> -->
-							<!-- <input type="text" class="form-control typeahead-major" id="major"> -->
-						<!-- </div> -->
-						<!-- <div class="form-group"> -->
-							<!-- <label for="major">畢業年</label> -->
-							<!-- <input type="number" class="form-control typeahead-year" id="year"> -->
-						<!-- </div> -->
-						<!-- <button id="search-adv" type="button" class="btn btn-primary">搜尋</button> -->
-						<!-- <button id="search-clr" type="button" class="btn btn-warning float-right">清除</button> -->
+						<div class="form-group">
+							<label for="tag">標籤</label>
+							<input type="text" class="form-control typeahead-tags search-input" id="tags">
+						</div>
+            <div class="btn-group-toggle" data-toggle="buttons">
+            </div>
+						<button id="search-clr" type="button" class="btn btn-outline-warning float-right search-btn">清除</button>
 					</form>
 				</div>
       </div>
@@ -99,13 +97,10 @@
 
 
     </main>
-
-    <footer class="container">
-      <p>&copy; Company 2019</p>
-    </footer>
   </body>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="../lib/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+  <script src="./bootstrap3-typeahead.min.js"></script>
 	<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
 	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 

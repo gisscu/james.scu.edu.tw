@@ -7,11 +7,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <!-- CSS-->
-    <link rel="stylesheet" href="css/timeline.css?v1">
-    <!--FONT-->
-    <link rel="stylesheet" href="css/fonts/font.default.css?v1">
-    <!-- Style-->
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/fonts/font.abril-droidsans.css">
     <style>
       html, body {
       	height:100%;
@@ -19,14 +16,11 @@
       	padding: 0px;
       	margin: 0px;
       }
-      .tl-timeline {
-
-      }
 
     </style>
     <link href="../lib/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="../lib/css/jumbotron.css" rel="stylesheet">
-    <link rel="stylesheet" href="sna.css" type="text/css">
+    <link rel="stylesheet" href="timeline.css" type="text/css">
     <!-- HTML5 shim, for IE6-8 support of HTML elements-->
     <!--if lt IE 9
     script(src='https://html5shim.googlecode.com/svn/trunk/html5.js')
@@ -42,9 +36,15 @@
 
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-					<li class="nav-item active">
-						<a class="nav-link" href="../timeline/">年表<span class="sr-only">(current)</span></a>
-					</li>
+          <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="../timeline/" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              年表
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <a class="dropdown-item" href="#0">徐震史</a>
+              <a class="dropdown-item" href="#1">社工史</a>
+            </div>
+          </li>
 					<li class="nav-item">
 						<a class="nav-link" href="../sna/">關係圖</a>
 					</li>
@@ -59,6 +59,8 @@
     </nav>
     <div id="timeline-embed"></div>
   </body>
-<script src="js/timeline.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+<script src="../lib/js/bootstrap.bundle.min.js"></script>
 <script src="load.js"></script>
 </html>

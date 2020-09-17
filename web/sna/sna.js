@@ -79,7 +79,7 @@ $(async () => {
             if (dragged && dragged.node !== null && dragged.distance < 30) {
               dragged.node.fixed = true
               dragged.node.mass = 10
-              click(dragged.node)
+              click(dragged.node, true)
               $(canvas).bind('mousemove', handler.dragged)
               $(window).bind('mouseup', handler.dropped)
             }
@@ -131,41 +131,6 @@ $(async () => {
     return that
   }
 
-  let eduItemDom = $('.edu-item').clone()
-
-  let updateItem = (data) => {
-    $('.edu-item').remove()
-    $('.container').removeClass('shown').delay(50).queue(function(next){
-      $(this).addClass('shown');
-      next();
-    })
-    $('.name').text(data.name)
-
-    for (let eduItem of data.eduItems) {
-      let dom = eduItemDom.clone()
-      if (eduItem[0] && eduItem[1] && eduItem[2]) {
-        dom.find('.title').text(`${eduItem[0]} - ${eduItem[1]}`)
-        dom.find('.year').text(eduItem[2])
-        if (eduItem[3]) {
-          dom.find('.content').text(eduItem[3])
-        }
-
-        $('.col-md-4').append(dom)
-      }
-    }
-
-    $('.description').text(data.description)
-
-    if (data.name === '徐震') {
-      $('#child').hide()
-      $('#source').hide()
-    } else {
-      $('#child').show()
-      $('#source').show()
-    }
-  }
-
-  window.updateItem = updateItem
 
   let nodeRule = {}
   let edgeRule = {}
@@ -319,8 +284,8 @@ $(async () => {
   }
 
   let status = 0
-  let click = (node) => {
-    console.log(node)
+  let nowNode
+  let click = (node, mode) => {
     $('#child').removeClass('btn-warning').addClass('btn-outline-warning')
     if (status) {
       selectGetSourceTarget(node.name)
@@ -337,35 +302,38 @@ $(async () => {
 
       node.data.highlight = false
 
-      updateItem({
-        name: node.name,
-        description: nodeRule[node.name].data.description,
-        eduItems: [
-          [
-            nodeRule[node.name].data['學士'],
-            nodeRule[node.name].data['學士系所'],
-            nodeRule[node.name].data['學士畢業年'],
+      if (mode) {
+        loadGallery(true)
+        openGallery({
+          name: node.name,
+          description: nodeRule[node.name].data.description,
+          class: [
+            nodeRule[node.name].data['現職'],
+            nodeRule[node.name].data['經歷'],
           ],
-          [
-            nodeRule[node.name].data['碩士'],
-            nodeRule[node.name].data['碩士系所'],
-            nodeRule[node.name].data['碩士畢業年'],
-            nodeRule[node.name].data['碩士論文'],
-          ],
-          [
-            nodeRule[node.name].data['博士'],
-            nodeRule[node.name].data['博士系所'],
-            nodeRule[node.name].data['博士畢業年'],
-            nodeRule[node.name].data['博士論文'],
+          eduItems: [
+            [
+              nodeRule[node.name].data['學士'],
+              nodeRule[node.name].data['學士系所'],
+              nodeRule[node.name].data['學士畢業年'],
+            ],
+            [
+              nodeRule[node.name].data['碩士'],
+              nodeRule[node.name].data['碩士系所'],
+              nodeRule[node.name].data['碩士畢業年'],
+              nodeRule[node.name].data['碩士論文'],
+            ],
+            [
+              nodeRule[node.name].data['博士'],
+              nodeRule[node.name].data['博士系所'],
+              nodeRule[node.name].data['博士畢業年'],
+              nodeRule[node.name].data['博士論文'],
+            ]
           ]
-        ]
-      })
-
-      if (!node.data.clicked) {
-        addNodeChild(node.name)
-      } else if (!node.data.force){
-        removeNodeAllChild(node.name)
+        })
       }
+
+      nowNode = node
     }
   }
 
@@ -478,7 +446,7 @@ $(async () => {
 
     addNodeChild(name)
 
-    click(node)
+    click(node, false)
 
     let keyword = {
       name: search.keyword('name'),
@@ -516,18 +484,23 @@ $(async () => {
       }
     })
 
-    $('#source1').click(() => {
-      for (let key in nodeRule) {
-        if (nodeRule[key].style[2]) {
-          getSource('徐震', key)
-        }
-      }
-    })
 
     $('#source2').click(() => {
       status = 1
       $('#source').removeClass('btn-outline-danger').addClass('btn-danger')
     })
+
+    let doSearch = function () {
+      let current = $(this).typeahead('getActive');
+      if (current && current.name === $(this).val()) {
+        let res = search.filter({
+          '碩士': $('.typeahead-school').val(),
+          '碩士系所': $('.typeahead-major').val(),
+          '碩士畢業年': $('.typeahead-year').val(),
+        })
+        highlight(res)
+      }
+    }
 
     $(".typeahead-school").typeahead({
 			source: keyword.school.map((school) => {
@@ -536,7 +509,7 @@ $(async () => {
         }
       }),
 			autoSelect: true
-		})
+		}).change(doSearch)
 
     $(".typeahead-major").typeahead({
 			source: keyword.major.map((major) => {
@@ -545,7 +518,7 @@ $(async () => {
         }
       }),
 			autoSelect: true
-		})
+		}).change(doSearch)
 
     $(".typeahead-year").typeahead({
 			source: keyword.year.map((year) => {
@@ -554,18 +527,8 @@ $(async () => {
         }
       }),
 			autoSelect: true
-		})
+		}).change(doSearch)
 
-
-    $('#search-adv').click(() => {
-      let res = search.filter({
-        '碩士': $('.typeahead-school').val(),
-        '碩士系所': $('.typeahead-major').val(),
-        '碩士畢業年': $('.typeahead-year').val(),
-      })
-
-      highlight(res)
-    })
 
     $('#search-clr').click(() => {
       removeAllHighLight()
@@ -581,12 +544,6 @@ $(async () => {
         highlight(res)
       }
     })
-
-    // test
-    window.particleSystem = particleSystem
-    window.sys = sys
-    window.nodeRule = nodeRule
-    window.edgeRule = edgeRule
   }
 
   // let nodeData = await gsheet('16Ya5soMF7rCkBd-jeSPnpsmiuG5GpSKcwEtPnDXXSvk', 2)
@@ -614,11 +571,11 @@ $(async () => {
   let loading = (status) => {
     if (status) {
       $('.loading').removeClass('hidden').addClass('shown')
-      $('.jumbotron').removeClass('shown').addClass('hidden')
+      $('.canvas').removeClass('shown').addClass('hidden')
       $('footer').removeClass('shown').addClass('hidden')
     } else {
       $('.loading').removeClass('shown').addClass('hidden')
-      $('.jumbotron').removeClass('hidden').addClass('shown')
+      $('.canvas').removeClass('hidden').addClass('shown')
       $('footer').removeClass('hidden').addClass('shown')
     }
   }
@@ -631,66 +588,97 @@ $(async () => {
     sys.screenSize(canvas.width, canvas.height)
   })
 
-  window.resize = (w, h) => {
-    canvas.width = w
-    canvas.height = h
-    sys.screenSize(canvas.width, canvas.height)
+  let loadGallery = (mode) => {
+    if (mode !== status.gallery) {
+      if (mode) {
+        $('.gallery').addClass('gallery-show')
+      } else {
+        $('.gallery').removeClass('gallery-show')
+      }
+    }
   }
 
-  window.move = (t, l) => {
-    particleSystem.eachNode(function (node, pt) {
-      node.p.x += l
-      node.p.y += t
+  let openGallery = (item) => {
+    $('.gallery').html('')
+    let itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
+
+    // name: node.name,
+    // description: nodeRule[node.name].data.description,
+    // eduItems: [
+      // [
+        // nodeRule[node.name].data['學士'],
+        // nodeRule[node.name].data['學士系所'],
+        // nodeRule[node.name].data['學士畢業年'],
+
+    itemDomBorder.addClass('gallery-no-description')
+
+    let itemDom = $('<div>').addClass('gallery-body')
+    let close = $('<button>').addClass('gallery-close')
+      .addClass('on').append($('<span>')).append($('<span>')).append($('<span>')).click(function () {
+        loadGallery(false)
     })
-  }
 
-  window.set = (parameters) => {
-    sys.parameters({
-      stiffness: 100,
-      repulsion: 10,
-      friction: 0.5,
-      gravity: true,
-      fps: 30,
-      dt: 0.02,
-      precision: 0.5,
-      ...parameters
+    itemDom.append(close)
+    itemDom.addClass('grid-type4')
+    itemDomBorder.addClass('full-w')
+
+    if (item.name) {
+      let titleDom = $('<h5>').addClass('gallery-title').html(item.name)
+
+      itemDom.append(titleDom)
+    }
+
+    let contentsDom = $('<div>').addClass('grid-content')
+
+    let contents = item.description.split('\n')
+
+    for (let content of contents) {
+      if (content) {
+        let contentDom = $('<p>').html(content.slice(0, 100))
+        contentsDom.append(contentDom)
+      }
+    }
+
+    itemDom.append(contentsDom)
+
+    let tagsDom = $('<div>').addClass('grid-tag')
+    let linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-primary').html(item.class[0]).attr('href', '#'))
+    itemDom.append(linksDom)
+    linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html(item.class[1]).attr('href', '#'))
+    itemDom.append(linksDom)
+
+    for (let tag of item.eduItems) {
+      if (tag[0] || tag[1] || tag[2]) {
+        let tagDom = $('<a>').addClass('badge badge-pill badge-secondary').html(`${tag[0]} ${tag[1]} ${tag[2]}`).attr('href', '#')
+        tagsDom.append(tagDom)
+      }
+    }
+    let tags2Dom = $('<div>').addClass('grid-tag2')
+    let tag1Dom = $('<a>').addClass('badge badge-pill badge-light').html(`展開`).attr('href', '#').click(() => {
+      if (!nowNode.data.clicked) {
+        addNodeChild(nowNode.name)
+      } else if (!nowNode.data.force){
+        removeNodeAllChild(nowNode.name)
+      }
     })
+    let tag2Dom = $('<a>').addClass('badge badge-pill badge-success').html(`桃李`).attr('href', '#')
+    tags2Dom.append(tag2Dom).click(() => {
+      status = 1
+    })
+    let tag3Dom = $('<a>').addClass('badge badge-pill badge-success').html(`朔源`).attr('href', '#').click(() => {
+      for (let key in nodeRule) {
+        if (nodeRule[key].style[2]) {
+          getSource('徐震', key)
+        }
+      }
+    })
+    tags2Dom.append(tag3Dom)
+    tags2Dom.append(tag1Dom)
+
+    itemDom.append(tags2Dom)
+    itemDom.append(tagsDom)
+    itemDomBorder.append(itemDom)
+
+    $('.gallery').append(itemDomBorder)
   }
-
-  // let screenSize = 1
-  // canvas.addEventListener('wheel', function (e) {
-    // e.preventDefault()
-
-    // 縮放
-    // screenSize +=  e.deltaY / Math.abs(e.deltaY) * 0.1
-    // particleSystem.screenSize(canvas.width * screenSize, canvas.height * screenSize)
-    // particleSystem.eachNode(function (node, pt) {
-      // let pos = $(canvas).offset()
-      // let s = arbor.Point(e.pageX - pos.left, e.pageY - pos.top)
-
-      // let p = particleSystem.fromScreen(s)
-      // if (node.data.name === '徐震') {
-        // console.log('nodeP')
-        // console.log('from screen')
-        // console.log(node.p)
-        // console.log('to screen')
-        // console.log(particleSystem.toScreen(node.p))
-
-        // console.log('mouse P')
-        // console.log(`${e.pageX} , ${e.pageY}`)
-        // console.log('from screen')
-        // console.log(p)
-        // console.log('to screen')
-        // console.log(s)
-      // }
-
-      // let ns = particleSystem.toScreen(node.p)
-
-      // ns.x -= (s.x - ns.x) * screenSize
-      // ns.y -= (s.y - ns.y) * screenSize
-
-      // let fp = particleSystem.fromScreen(ns)
-      // node.p = fp
-    // })
-  // })
 })

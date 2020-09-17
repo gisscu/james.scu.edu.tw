@@ -34,7 +34,7 @@ $(async () => {
 
 	if(!$('#viewport').tagcanvas({
 		textColour: '#1A2330',
-		outlineColour: '#1A2330',
+    outlineMethod: 'none',
     weight: true,
     weightFrom: 'data-weight',
     weightMode: 'size',

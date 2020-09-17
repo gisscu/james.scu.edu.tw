@@ -1,14 +1,39 @@
 $(async () => {
   let sheet = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 4)
-
-  let filterMap = {}
   let $grid
   let items
-  let status
-  let gallery = false
-  let loadGallery = (data) => {
-    status = false
+  let main = $('main')
+  let body = $('html, body')
+  let clickedItem = null
+  let status = {
+    gallery: false,
+  }
+
+  let contentsLimit = 8
+  let loadData = (data) => {
+    data = shuffle(data)
+
+    // 移除第 2 個寬版元素
+    if (data.length > 1) {
+      let retryLimit = 5
+      let i = 0
+      while (i > retryLimit || data[1].content.split('\n').length > contentsLimit) {
+        let item = data.splice(1, 1)
+        data.push(item)
+        i++
+        console.log('replace')
+      }
+    }
+
+    if (data.length > 1) {
+      data.splice(2, 0, {
+        mode: 'block',
+      })
+    }
+
     loading(true)
+    clickedItem = main
+    loadGallery(false)
     $('.grid-item').remove()
 
     for (let key in data) {
@@ -20,16 +45,16 @@ $(async () => {
       switch (item.type) {
         case '詩作':
           itemDom.addClass('grid-type1')
-          break;
+          break
         case '照片':
           itemDom.addClass('grid-type2')
-          break;
+          break
         case '書法':
           itemDom.addClass('grid-type3')
-          break;
+          break
         case '文章':
           itemDom.addClass('grid-type4')
-          break;
+          break
       }
 
       if (item.title) {
@@ -51,6 +76,10 @@ $(async () => {
         }
 
         let contents = item.content.split('\n')
+
+        if (item.type === '詩作' && contents.length > contentsLimit) {
+          itemDomBorder.addClass('grid-item-w5')
+        }
 
         for (let content of contents) {
           if (content) {
@@ -90,7 +119,7 @@ $(async () => {
       }
 
       let tagsDom = $('<div>').addClass('grid-tag')
-      let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', '#')
+      let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', 'javascript:void()')
       tagsDom.append(typeDom)
 
       if (item.tag) {
@@ -98,7 +127,7 @@ $(async () => {
 
         for (let tag of tags) {
           if (tag) {
-            let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', '#')
+            let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', 'javascript:void()')
             tagsDom.append(tagDom)
           }
         }
@@ -107,51 +136,48 @@ $(async () => {
       itemDom.append(tagsDom)
 
       itemDomBorder.attr('key', key)
+      itemDomBorder.attr('id', `test${key}`)
 
 
       let openGallery = (key) => {
+        let galleryItem = data[key]
+
         $('.gallery').html('')
         let itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
 
-        let titleDom = $('<div>').addClass('gallery-title').append($('<p>').html(data[key].content || data[key].title))
-
-        if (!data[key].description) {
-          itemDomBorder.addClass('full-h')
-          titleDom.addClass('full-h')
+        if (!galleryItem.description) {
+          itemDomBorder.addClass('gallery-no-description')
+        } else {
+          itemDomBorder.addClass('gallery-has-description')
         }
 
-        if ((data[key].type === '書法' || data[key].type === '照片')
-          && !data[key].title && !data[key].content) {
-          itemDomBorder.addClass('full-w')
-        }
+        let itemDom = $('<div>').addClass('gallery-body')
+        let close = $('<button>').addClass('gallery-close')
+          .addClass('on').append($('<span>')).append($('<span>')).append($('<span>')).click(function () {
+            $('.clicked').click()
+        })
 
-        if (data[key].type === '詩作' || data[key].type === '文章') {
-          itemDomBorder.addClass('full-w')
-        }
 
-        if ((data[key].type === '書法' || data[key].type === '照片') && (data[key].content || data[key].title)) {
-          $('.gallery').append(titleDom)
-        }
-
-        let itemDom = $('<div>').addClass('grid-body')
-
+        itemDom.append(close)
         switch (item.type) {
           case '詩作':
             itemDom.addClass('grid-type1')
-            break;
+            itemDomBorder.addClass('full-w')
+            break
           case '照片':
             itemDom.addClass('grid-type2')
-            break;
+            break
           case '書法':
             itemDom.addClass('grid-type3')
-            break;
+            break
           case '文章':
             itemDom.addClass('grid-type4')
-            break;
+            itemDomBorder.addClass('full-w')
+            break
         }
 
         if (item.title) {
-          let titleDom = $('<h5>').addClass('grid-title').html(item.title)
+          let titleDom = $('<h5>').addClass('gallery-title').html(item.title)
           if (!item.thumbnail) {
             titleDom.addClass('nomedia')
           } else {
@@ -183,7 +209,6 @@ $(async () => {
         if (item.type === '文章') {
           let contentsDom = $('<div>').addClass('grid-content')
 
-          console.log(item)
           if (!item.thumbnail) {
             contentsDom.addClass('nomedia')
           }
@@ -205,11 +230,18 @@ $(async () => {
             'src': item.sample,
           }).addClass('gallery-image')
 
+          if (galleryItem.displaytype === 'width') {
+            mediaDom.addClass('full-w-img')
+            itemDomBorder.addClass('gallery-has-media-full-w')
+          } else {
+            mediaDom.addClass('full-h-img')
+          }
+
           itemDom.append(mediaDom)
         }
 
         let tagsDom = $('<div>').addClass('grid-tag')
-        let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', '#')
+        let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', 'javascript:void()')
         tagsDom.append(typeDom)
 
         if (item.tag) {
@@ -217,14 +249,16 @@ $(async () => {
 
           for (let tag of tags) {
             if (tag) {
-              let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', '#')
+              let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', 'javascript:void()')
               tagsDom.append(tagDom)
             }
           }
         }
 
-        if (data[key].media) {
-          let linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html('原始檔案').attr('href', data[key].media))
+        if (galleryItem.media) {
+          let linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html('原始檔案')
+            .attr('href', galleryItem.media)
+            .attr('target', '_blank'))
           itemDom.append(linksDom)
         }
 
@@ -232,49 +266,27 @@ $(async () => {
         itemDomBorder.append(itemDom)
 
         $('.gallery').append(itemDomBorder)
-        if (data[key].description) {
-          let description = $('<div>').addClass('gallery-description').append($('<p>').html(data[key].description))
+        if (galleryItem.description) {
+          let description = $('<div>').addClass('gallery-description').append($('<p>').html(galleryItem.description))
           $('.gallery').append(description)
         }
       }
 
       itemDomBorder.click(function () {
-        let c = $(this).attr("class").split(" ").indexOf('clicked')
-
-        if (c !== -1) {
-          $('#grid').removeClass('grid-move')
-          $('.gallery').removeClass('gallery-show')
-          $('.grid-block').css({
-            height: 0,
-            display: 'none',
-          })
-
-          setTimeout(() => {
-            $grid.masonry('layout')
-          }, 500)
-          gallery = false;
+        let hasClicked = $(this).hasClass('clicked')
+        let key = $(this).attr('key')
+        clickedItem = $(this)
+        if (hasClicked) {
+          loadGallery(false)
+          $(this).removeClass('clicked')
         } else {
-          if (!gallery) {
-            $('#grid').addClass('grid-move')
-            $('.gallery').addClass('gallery-show')
-            $('.grid-block').css({
-              height: $('.grid').height(),
-              display: 'block',
-            })
-
-            setTimeout(() => {
-              $grid.masonry('layout')
-              display()
-            }, 500)
-          }
-
-          openGallery($(this).attr('key'))
+          loadGallery(true)
           $('.clicked').removeClass('clicked')
           $(this).addClass('clicked')
-
-          gallery = true;
+          openGallery(key)
         }
       })
+
       if (item.mode !== 'block') {
         itemDomBorder.append(itemDom)
       } else {
@@ -289,6 +301,35 @@ $(async () => {
     items = $('.grid-item')
   }
 
+  let loadGallery = (mode) => {
+    if (mode !== status.gallery) {
+      if (mode) {
+        $('#grid').addClass('grid-move')
+        $('.gallery').addClass('gallery-show')
+        $('.grid-block').css({
+          height: $('.grid').height(),
+          display: 'block',
+        })
+        status.gallery = true
+
+      } else {
+        $('#grid').removeClass('grid-move')
+        $('.gallery').removeClass('gallery-show')
+        $('.grid-block').css({
+          height: 0,
+          display: 'none',
+        })
+
+        status.gallery = false
+      }
+
+      setTimeout(() => {
+        $grid.masonry('layout')
+      }, 500)
+    }
+
+  }
+
   let display = () => {
     let heightStart = window.scrollY
     let heightEnd = window.scrollY + window.innerHeight
@@ -296,14 +337,14 @@ $(async () => {
     items.each((num, item) => {
       let offset = $(item).offset()
 
-      if (offset.top >= heightStart && offset.top <= heightEnd && !$(item).hasClass('shown')) {
+      if (offset.top <= heightEnd && !$(item).hasClass('shown')) {
         $(item).addClass('shown')
       }
     })
   }
 
-  let loading = (status) => {
-    if (status) {
+  let loading = (mode) => {
+    if (mode) {
       $('.loading').removeClass('hidden').addClass('shown')
       $('footer').removeClass('shown').addClass('hidden')
     } else {
@@ -313,109 +354,204 @@ $(async () => {
   }
 
   function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    let temporaryValue, randomIndex
+    let currentIndex = array.length
 
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
 
       // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
+      randomIndex = Math.floor(Math.random() * currentIndex)
+      currentIndex -= 1
 
       // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+      temporaryValue = array[currentIndex]
+      array[currentIndex] = array[randomIndex]
+      array[randomIndex] = temporaryValue
     }
 
-    return array;
+    return array
   }
 
 
-  let data = shuffle(sheet)
+  let data = sheet
+
+  // 接 word cloud 搜尋
   if (location.hash) {
     let s = location.hash.replace('#', '')
     let arr = decodeURI(s).split(',')
     data = filter(sheet, {
       jiebatags: arr
     })
-    console.log(sheet)
-    console.log(data)
+
   }
 
-  data.splice(2, 0, {
-    mode: 'block',
-  })
+  loadData(data)
 
-  loadGallery(data)
-
+  let titleArr = []
+  let tagMap = {}
   for (let item of sheet) {
-    if (item.type) {
-      filterMap[item.type] = {}
+    if (item.title) {
+      titleArr.push(item.title)
+    }
+
+    if (item.tag) {
+      let tags = item.tag.split(',')
+
+      for (let tag of tags) {
+        if (tag) {
+          tagMap[tag] = false
+        }
+      }
     }
   }
 
-  let dropdownItem = $('<a>').addClass('dropdown-item')
-  for (let key in filterMap) {
-    let item = dropdownItem.clone()
+  let filterArr = ['照片', '詩作', '書法', '文章', '全部']
 
-    item.text(key)
-    item.click(function () {
-      let type = $(this).text()
+  let labelItem= $('<label>').addClass('btn btn-outline-success dropdown-btn')
+  let inputItem = $('<input>').attr({
+    type: 'checkbox',
+    autocomplete: 'off',
+  })
 
-      let data = filter(sheet, {
-        type: [type],
-      })
-      $('.loading').removeClass('hidden').addClass('hidden')
-      $('footer').addClass('shown')
+  for (let key of filterArr) {
+    let label = labelItem.clone()
+    let item = inputItem.clone()
+    if (key === '全部') {
+      label.addClass('all')
+    }
 
-      loadGallery(data)
+    label.text(key)
+    label.click(function () {
+      let data = sheet
+      let lists = $('.dropdown-btn.active')
+      let selected = $(this).text()
+
+      if (selected === '全部') {
+        let lists = $('.dropdown-btn')
+
+        for (let list of lists) {
+          $(list).addClass('active')
+        }
+      } else {
+        let type = []
+        for (let list of lists) {
+          type.push($(list).text())
+        }
+
+        let sIndex = type.indexOf(selected)
+        if (sIndex === -1) {
+          type.push(selected)
+        } else {
+          type.splice(sIndex, 1)
+        }
+
+        if (type.length > 0 && type.indexOf('全部') === -1) {
+          data = filter(sheet, {
+            type,
+          })
+        }
+      }
+
+      loadData(data)
       $grid.masonry('reloadItems')
       $grid.imagesLoaded(() => {
         $grid.masonry('layout')
       })
     })
 
-    $('.dropdown-menu').append(item)
+    label.append(item)
+    $('.btn-group-toggle').append(label)
   }
 
-  let all = dropdownItem.clone()
+  let searchTitle = $('.typeahead-title')
+	searchTitle.typeahead({
+    source: titleArr,
+    autoSelect: true
+  })
 
-  all.text('全部')
-  all.click(function () {
-    $('.loading').removeClass('hidden').addClass('hidden')
-    $('footer').addClass('shown')
+	searchTitle.change(function() {
+		let current = searchTitle.typeahead('getActive');
+		if (current && current === searchTitle.val()) {
+      let data = filter(sheet, {
+        title: [current],
+      })
+      $('.dropdown-btn').removeClass('active')
 
-    loadGallery(sheet)
+      loadData(data)
+      $grid.masonry('reloadItems')
+      $grid.imagesLoaded(() => {
+        $grid.masonry('layout')
+      })
+		}
+	});
+
+  let tagArr = []
+  for (let tag in tagMap) {
+    tagArr.push(tag)
+  }
+
+  let searchTag = $('.typeahead-tags')
+	searchTag.typeahead({
+    source: tagArr,
+    autoSelect: true
+  })
+
+	searchTag.change(function() {
+		let current = searchTag.typeahead('getActive');
+		if (current && current === searchTag.val()) {
+      let data = filter(sheet, {
+        tag: [current],
+      })
+      $('.dropdown-btn').removeClass('active')
+
+      loadData(data)
+      $grid.masonry('reloadItems')
+      $grid.imagesLoaded(() => {
+        $grid.masonry('layout')
+      })
+		}
+	});
+
+  $('#search-clr').click(() => {
+    let lists = $('.search-input')
+
+    for (list of lists) {
+      $(list).val('')
+    }
+    $('.dropdown-btn').removeClass('active')
+
+    loadData(sheet)
     $grid.masonry('reloadItems')
     $grid.imagesLoaded(() => {
       $grid.masonry('layout')
     })
   })
 
-  $('.dropdown-menu').append(all)
-
   // init Masonry
   $grid = $('.grid').masonry({
     itemSelector: '.grid-item',
     columnWidth: '.grid-sizer',
-    gutter: 5,
+    gutter: 4,
     // fitWidth: true,
   }).on('layoutComplete', () => {
-    status = true
     loading(false)
     display()
 
-    window.addEventListener('scroll', function (event) {
+    if (clickedItem) {
+      body.stop().animate({
+        scrollTop: clickedItem.offset().top - main.offset().top - 5
+      }, 100, 'swing', () => {
+        clickedItem = null
+      })
+    }
+
+    window.addEventListener('scroll', () => {
       display()
     })
   })
 
-
-
   $grid.imagesLoaded(() => {
-    $('.loading').addClass('hidden')
-    $('footer').addClass('shown')
     $grid.masonry('layout')
   })
 
