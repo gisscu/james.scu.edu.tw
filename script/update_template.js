@@ -162,21 +162,21 @@ async function api(auth) {
       let fileMeta = res.mimeType
 
       if (file && fileMeta.match('image') && process.argv[3] === '1') {
-        let thumbnailName = `./thumbnail/${fileId}.jpg`
         try {
+          let info = await sharp(file).metadata()
+          row.display_type = info.width > info.height ? 'width' : 'height'
+          console.log(info)
+
+          let thumbnailName = `./thumbnail/${fileId}.jpg`
           await sharp(file).resize({
-            width: 300,
+            width: 600,
             fit: 'inside'
           }).jpeg().toFile(`../web/gallery/${thumbnailName}`)
           row.thumbnail = thumbnailName
-        } catch (err) {
-          console.log(err)
-        }
 
-        let sampleName = `./sample/${fileId}.jpg`
-        try {
+          let sampleName = `./sample/${fileId}.jpg`
           await sharp(file).resize({
-            width: 600,
+            width: 1200,
             fit: 'inside'
           }).jpeg().toFile(`../web/gallery/${sampleName}`)
           row.sample = sampleName
