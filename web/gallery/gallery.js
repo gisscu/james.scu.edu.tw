@@ -13,15 +13,18 @@ $(async () => {
   let loadData = (data) => {
     data = shuffle(data)
 
-    // 移除第 2 個寬版元素
+    // 寬版元素移至第一個
     if (data.length > 1) {
-      let retryLimit = 5
-      let i = 0
-      while (i > retryLimit || data[1].content.split('\n').length > contentsLimit) {
-        let item = data.splice(1, 1)
-        data.push(item)
-        i++
-        console.log('replace')
+      let item, len
+      for (let i = 0; i < data.length; i++) {
+        if (!item && data[i].type === '詩作' && data[i].content.split('\n').length > contentsLimit) {
+          len = i
+        }
+      }
+
+      if (len) {
+        item = data.splice(len, 1)[0]
+        data.splice(0, 0, item)
       }
     }
 
