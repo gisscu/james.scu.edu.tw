@@ -4,6 +4,7 @@ $(async () => {
   let gfx = arbor.Graphics(canvas)
   let particleSystem
   let left, top
+  let lockNode = { x: 0, y: 0 }
   let Renderer = () => {
     let that = {
       init: function (system) {
@@ -54,6 +55,10 @@ $(async () => {
               }
             }
 
+            if (node.data.focus) {
+              node.p = lockNode
+            }
+
             gfx.text(node.name, pt.x, pt.y+35, {
               color: '#000000',
               align: 'center',
@@ -77,8 +82,22 @@ $(async () => {
             dragged = particleSystem.nearest(mouseP)
 
             if (dragged && dragged.node !== null && dragged.distance < 30) {
+              let p = particleSystem.fromScreen(mouseP)
+              lockNode = p
+
+              addCanvasBtn(e.pageX + 30, e.pageY - 20)
+
               dragged.node.fixed = true
               dragged.node.mass = 10
+
+              sys.eachNode((node) => {
+                if (node.data.focus) {
+                  node.data.focus = false
+                }
+              })
+
+              dragged.node.data.focus = true
+
               click(dragged.node, true)
               $(canvas).bind('mousemove', handler.dragged)
               $(window).bind('mouseup', handler.dropped)
@@ -92,6 +111,7 @@ $(async () => {
 
             if (dragged && dragged.node !== null) {
               let p = particleSystem.fromScreen(s)
+              lockNode = p
               dragged.node.p = p
               dragged.node.fixed = true
               dragged.node.mass = 10
@@ -435,6 +455,39 @@ $(async () => {
     }
   }
 
+  let addCanvasBtn = (x, y) => {
+    let tags2Dom = $('<div>').addClass('grid-tag2')
+    let tag1Dom = $('<a>').addClass('badge badge-pill badge-light').html(`開闔`).attr('href', '#').click(function () {
+      $(this).toggleClass('clicked')
+      if (!nowNode.data.clicked) {
+        addNodeChild(nowNode.name)
+      } else if (!nowNode.data.force){
+        removeNodeAllChild(nowNode.name)
+      }
+    })
+
+    let tag2Dom = $('<a>').addClass('badge badge-pill badge-light').html(`朔源`).attr('href', '#').click(function () {
+      $(this).toggleClass('clicked')
+      status = 1
+    })
+
+    let tag3Dom = $('<a>').addClass('badge badge-pill badge-light').html(`桃李`).attr('href', '#').click(function () {
+      $(this).toggleClass('clicked')
+    })
+    tags2Dom.append(tag1Dom)
+    tags2Dom.append(tag2Dom)
+    tags2Dom.append(tag3Dom)
+
+    $('.canvas-btn').remove()
+    let canvasBtn = $('<div>').addClass('canvas-btn').css({
+      top: y,
+      left: x,
+    })
+    canvasBtn.append(tags2Dom)
+
+    $('.canvas').append(canvasBtn)
+  }
+
 
   window.getSource = getSource
 
@@ -491,7 +544,7 @@ $(async () => {
     })
 
     let doSearch = function () {
-      let current = $(this).typeahead('getActive');
+      let current = $(this).typeahead('getActive')
       if (current && current.name === $(this).val()) {
         let res = search.filter({
           '碩士': $('.typeahead-school').val(),
@@ -628,6 +681,42 @@ $(async () => {
       itemDom.append(titleDom)
     }
 
+
+    let tagsDom = $('<div>').addClass('grid-tag')
+
+    for (let tag of item.eduItems) {
+      if (tag[0] || tag[1] || tag[2]) {
+        let tagDom = $('<a>').addClass('badge badge-pill badge-secondary').html(`${tag[0]} ${tag[1]} ${tag[2]}`).attr('href', '#')
+        tagsDom.append(tagDom)
+      }
+    }
+    let class0Arr = item.class[0].split('\n')
+    let linksDom = $('<div>').addClass('gallery-tag')
+    for (let tag of class0Arr) {
+      linksDom.append($('<a>').addClass('badge badge-pill badge-primary').html(tag).attr('href', '#'))
+    }
+    itemDom.append(linksDom)
+
+    let class1Arr = item.class[1].split('\n')
+    linksDom = $('<div>').addClass('gallery-tag')
+    for (let tag of class1Arr) {
+      linksDom.append($('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', '#'))
+    }
+    itemDom.append(linksDom)
+
+
+    // let tag2Dom = $('<a>').addClass('badge badge-pill badge-success').html(`桃李`).attr('href', '#')
+    // tags2Dom.append(tag2Dom).click(() => {
+      // status = 1
+    // })
+    // let tag3Dom = $('<a>').addClass('badge badge-pill badge-success').html(`朔源`).attr('href', '#').click(() => {
+      // for (let key in nodeRule) {
+        // if (nodeRule[key].style[2]) {
+          // getSource('徐震', key)
+        // }
+      // }
+    // })
+    // tags2Dom.append(tag3Dom)
     let contentsDom = $('<div>').addClass('grid-content')
 
     let contents = item.description.split('\n')
@@ -639,44 +728,10 @@ $(async () => {
       }
     }
 
-    itemDom.append(contentsDom)
 
-    let tagsDom = $('<div>').addClass('grid-tag')
-    let linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-primary').html(item.class[0]).attr('href', '#'))
-    itemDom.append(linksDom)
-    linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html(item.class[1]).attr('href', '#'))
-    itemDom.append(linksDom)
-
-    for (let tag of item.eduItems) {
-      if (tag[0] || tag[1] || tag[2]) {
-        let tagDom = $('<a>').addClass('badge badge-pill badge-secondary').html(`${tag[0]} ${tag[1]} ${tag[2]}`).attr('href', '#')
-        tagsDom.append(tagDom)
-      }
-    }
-    let tags2Dom = $('<div>').addClass('grid-tag2')
-    let tag1Dom = $('<a>').addClass('badge badge-pill badge-light').html(`展開`).attr('href', '#').click(() => {
-      if (!nowNode.data.clicked) {
-        addNodeChild(nowNode.name)
-      } else if (!nowNode.data.force){
-        removeNodeAllChild(nowNode.name)
-      }
-    })
-    let tag2Dom = $('<a>').addClass('badge badge-pill badge-success').html(`桃李`).attr('href', '#')
-    tags2Dom.append(tag2Dom).click(() => {
-      status = 1
-    })
-    let tag3Dom = $('<a>').addClass('badge badge-pill badge-success').html(`朔源`).attr('href', '#').click(() => {
-      for (let key in nodeRule) {
-        if (nodeRule[key].style[2]) {
-          getSource('徐震', key)
-        }
-      }
-    })
-    tags2Dom.append(tag3Dom)
-    tags2Dom.append(tag1Dom)
-
-    itemDom.append(tags2Dom)
     itemDom.append(tagsDom)
+    // itemDom.append(tags2Dom)
+    itemDom.append(contentsDom)
     itemDomBorder.append(itemDom)
 
     $('.gallery').append(itemDomBorder)

@@ -29,9 +29,15 @@ $(async () => {
     }
 
     if (data.length > 1) {
-      data.splice(2, 0, {
-        mode: 'block',
-      })
+      if (data[0].type === '詩作' && data[0].content.split('\n').length > contentsLimit) {
+        data.splice(1, 0, {
+          mode: 'block',
+        })
+      } else {
+        data.splice(2, 0, {
+          mode: 'block',
+        })
+      }
     }
 
     loading(true)

@@ -96,12 +96,18 @@ footer {
 .gallery {
   z-index: 2;
   position: fixed;
-  width: 50%;
-  height: calc(100% - 3.5rem);
+  width: 40%;
+  // height: calc(100% - 3.5rem);
+  bottom: 4px;
   padding: 4px;
 
   transform: translate(-100%, 0);
   transition: 0.5s ease-in-out;
+}
+
+.canvas-btn {
+  z-index: 1;
+  position: fixed;
 }
 
 .gallery-content {
@@ -125,19 +131,18 @@ footer {
 
 .gallery-tag {
   font-size: 14pt;
-  position: absolute;
-  top: 100px;
-  left: 10px;
+  position: relative;
 }
 
 .gallery-body {
   height: 100%;
-  display: grid;
+  display: flow-root;
 
   color: #1A2330;
   font-size: inherit;
   font-weight: 700;
   vertical-align: middle;
+  padding-left: 10px;
 }
 
 .gallery-title {
@@ -151,9 +156,17 @@ footer {
 
 .grid-tag {
   font-size: 14pt;
-  position: absolute;
-  top: 100px;
-  right: 10px;
+  position: relative;
+}
+
+.clicked {
+  color: #fff !important;
+  background-color: #1A2330 !important;
+
+  &:hover {
+    color: #fff !important;
+    background-color: #1A2330 !important;
+  }
 }
 
 .grid-tag2 {
@@ -163,7 +176,6 @@ footer {
   right: 10px;
 
   > .badge {
-    margin-right: 5px;
     filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
   }
 
@@ -172,7 +184,7 @@ footer {
   }
 }
 
-.grid-tag .badge {
+.badge {
   margin-left: 4px;
 }
 
