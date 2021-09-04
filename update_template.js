@@ -2,8 +2,6 @@ const fs = require('fs')
 const readline = require('readline')
 const {google} = require('googleapis')
 const {GoogleSpreadsheet} = require('google-spreadsheet')
-const creds = require('./credentials.json')
-const creds2 = require('./gwtracker-sheet-7c4c126cc922.json')
 const sharp = require('sharp')
 const pdf = require('pdf-parse')
 const { exec } = require('child_process')
@@ -24,6 +22,8 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive.readonly',
 ]
 
+const creds = require('./client_secret.json')
+const serviceCreds = require('./gisscu.json')
 const TOKEN_PATH = 'token.json'
 
 console.log(`pdf max length: ${process.argv[2]}`)
@@ -143,7 +143,7 @@ async function api(auth) {
     })
   }
 
-  await doc.useServiceAccountAuth(creds2)
+  await doc.useServiceAccountAuth(serviceCreds)
   await doc.loadInfo()
 
   sheet = doc.sheetsById[galleryId]
