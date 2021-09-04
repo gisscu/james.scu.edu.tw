@@ -1,4 +1,4 @@
-let search = {
+const search = {
   nodes: [],
   edges: {},
   nodeMap: {},
@@ -27,7 +27,7 @@ let search = {
     })
   },
   keyword: (key) => {
-    let map = {}
+    const map = {}
     for (let i of search.nodes) {
       let val = i[key]
 

@@ -1,7 +1,7 @@
 $(async () => {
-  let tagData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 5)
+  const tagData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 5)
 
-  let loading = (status) => {
+  const loading = (status) => {
     if (status) {
       $('.loading').removeClass('hidden').addClass('shown')
       $('.jumbotron').removeClass('shown').addClass('hidden')
@@ -13,13 +13,13 @@ $(async () => {
     }
   }
 
-  let list = $('<ul>')
+  const list = $('<ul>')
 
-  for (let tag of tagData) {
+  for (const tag of tagData) {
     if (tag.display === 'TRUE') {
-      let li = $('<li>').append($('<a>').attr({
+      const li = $('<li>').append($('<a>').attr({
         href: `../gallery/#${tag.tag}`,
-        'data-weight': 10 + tag.count / 15,
+        'data-weight': 10 + tag.count / 15
       }).text(tag.tag))
 
       list.append(li)
@@ -28,22 +28,22 @@ $(async () => {
 
   $('#tags').append(list)
 
-  let canvas = $('#viewport')[0]
+  const canvas = $('#viewport')[0]
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight - 200
 
-	if(!$('#viewport').tagcanvas({
-		textColour: '#1A2330',
+  if (!$('#viewport').tagcanvas({
+    textColour: '#1A2330',
     outlineMethod: 'none',
     weight: true,
     weightFrom: 'data-weight',
     weightMode: 'size',
     reverse: true,
     depth: 0.8,
-		maxSpeed: 0.05
-	}, 'tags')) {
-		$('#viewport').hide();
-	}
+    maxSpeed: 0.05
+  }, 'tags')) {
+    $('#viewport').hide()
+  }
 
   loading()
 

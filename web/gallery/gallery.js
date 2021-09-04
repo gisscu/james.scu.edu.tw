@@ -1,16 +1,15 @@
 $(async () => {
-  let sheet = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 4)
-  let $grid
+  const sheet = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 4)
   let items
-  let main = $('main')
-  let body = $('html, body')
+  const main = $('main')
+  const body = $('html, body')
   let clickedItem = null
-  let status = {
-    gallery: false,
+  const status = {
+    gallery: false
   }
 
-  let contentsLimit = 8
-  let loadData = (data) => {
+  const contentsLimit = 8
+  const loadData = (data) => {
     data = shuffle(data)
 
     // 寬版元素移至第一個
@@ -31,11 +30,11 @@ $(async () => {
     if (data.length > 1) {
       if (data[0].type === '詩作' && data[0].content.split('\n').length > contentsLimit) {
         data.splice(1, 0, {
-          mode: 'block',
+          mode: 'block'
         })
       } else {
         data.splice(2, 0, {
-          mode: 'block',
+          mode: 'block'
         })
       }
     }
@@ -45,11 +44,11 @@ $(async () => {
     loadGallery(false)
     $('.grid-item').remove()
 
-    for (let key in data) {
-      let item = data[key]
+    for (const key in data) {
+      const item = data[key]
 
-      let itemDomBorder = $('<div>').addClass('grid-item').addClass('center')
-      let itemDom = $('<div>').addClass('grid-body')
+      const itemDomBorder = $('<div>').addClass('grid-item').addClass('center')
+      const itemDom = $('<div>').addClass('grid-body')
 
       switch (item.type) {
         case '詩作':
@@ -67,7 +66,7 @@ $(async () => {
       }
 
       if (item.title) {
-        let titleDom = $('<h5>').addClass('grid-title').html(item.title)
+        const titleDom = $('<h5>').addClass('grid-title').html(item.title)
         if (!item.thumbnail) {
           titleDom.addClass('nomedia')
         } else {
@@ -78,21 +77,21 @@ $(async () => {
       }
 
       if (item.content && !item.thumbnail) {
-        let contentsDom = $('<div>').addClass('grid-content')
+        const contentsDom = $('<div>').addClass('grid-content')
 
         if (!item.thumbnail) {
           contentsDom.addClass('nomedia')
         }
 
-        let contents = item.content.split('\n')
+        const contents = item.content.split('\n')
 
         if (item.type === '詩作' && contents.length > contentsLimit) {
           itemDomBorder.addClass('grid-item-w5')
         }
 
-        for (let content of contents) {
+        for (const content of contents) {
           if (content) {
-            let contentDom = $('<p>').html(content)
+            const contentDom = $('<p>').html(content)
             contentsDom.append(contentDom)
           }
         }
@@ -101,17 +100,17 @@ $(async () => {
       }
 
       if (item.type === '文章') {
-        let contentsDom = $('<div>').addClass('grid-content')
+        const contentsDom = $('<div>').addClass('grid-content')
 
         if (!item.thumbnail) {
           contentsDom.addClass('nomedia')
         }
 
-        let contents = item.description.split('\n')
+        const contents = item.description.split('\n')
 
-        for (let content of contents) {
+        for (const content of contents) {
           if (content) {
-            let contentDom = $('<p>').html(content.slice(0, 100))
+            const contentDom = $('<p>').html(content.slice(0, 100))
             contentsDom.append(contentDom)
           }
         }
@@ -120,23 +119,23 @@ $(async () => {
       }
 
       if (item.thumbnail) {
-        let mediaDom = $('<img>').attr({
-          'src': item.thumbnail,
+        const mediaDom = $('<img>').attr({
+          src: item.thumbnail
         }).addClass('grid-image')
 
         itemDom.append(mediaDom)
       }
 
-      let tagsDom = $('<div>').addClass('grid-tag')
-      let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', 'javascript:void()')
+      const tagsDom = $('<div>').addClass('grid-tag')
+      const typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', 'javascript:void()')
       tagsDom.append(typeDom)
 
       if (item.tag) {
-        let tags = item.tag.split(',')
+        const tags = item.tag.split(',')
 
-        for (let tag of tags) {
+        for (const tag of tags) {
           if (tag) {
-            let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', 'javascript:void()')
+            const tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', 'javascript:void()')
             tagsDom.append(tagDom)
           }
         }
@@ -147,12 +146,11 @@ $(async () => {
       itemDomBorder.attr('key', key)
       itemDomBorder.attr('id', `test${key}`)
 
-
-      let openGallery = (key) => {
-        let galleryItem = data[key]
+      const openGallery = (key) => {
+        const galleryItem = data[key]
 
         $('.gallery').html('')
-        let itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
+        const itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
 
         if (!galleryItem.description) {
           itemDomBorder.addClass('gallery-no-description')
@@ -160,12 +158,11 @@ $(async () => {
           itemDomBorder.addClass('gallery-has-description')
         }
 
-        let itemDom = $('<div>').addClass('gallery-body')
-        let close = $('<button>').addClass('gallery-close')
+        const itemDom = $('<div>').addClass('gallery-body')
+        const close = $('<button>').addClass('gallery-close')
           .addClass('on').append($('<span>')).append($('<span>')).append($('<span>')).click(function () {
             $('.clicked').click()
-        })
-
+          })
 
         itemDom.append(close)
         switch (item.type) {
@@ -186,7 +183,7 @@ $(async () => {
         }
 
         if (item.title) {
-          let titleDom = $('<h5>').addClass('gallery-title').html(item.title)
+          const titleDom = $('<h5>').addClass('gallery-title').html(item.title)
           if (!item.thumbnail) {
             titleDom.addClass('nomedia')
           } else {
@@ -197,17 +194,17 @@ $(async () => {
         }
 
         if (item.content && !item.thumbnail) {
-          let contentsDom = $('<div>').addClass('grid-content')
+          const contentsDom = $('<div>').addClass('grid-content')
 
           if (!item.thumbnail) {
             contentsDom.addClass('nomedia')
           }
 
-          let contents = item.content.split('\n')
+          const contents = item.content.split('\n')
 
-          for (let content of contents) {
+          for (const content of contents) {
             if (content) {
-              let contentDom = $('<p>').html(content)
+              const contentDom = $('<p>').html(content)
               contentsDom.append(contentDom)
             }
           }
@@ -216,17 +213,17 @@ $(async () => {
         }
 
         if (item.type === '文章') {
-          let contentsDom = $('<div>').addClass('grid-content')
+          const contentsDom = $('<div>').addClass('grid-content')
 
           if (!item.thumbnail) {
             contentsDom.addClass('nomedia')
           }
 
-          let contents = item.description.split('\n')
+          const contents = item.description.split('\n')
 
-          for (let content of contents) {
+          for (const content of contents) {
             if (content) {
-              let contentDom = $('<p>').html(content.slice(0, 100))
+              const contentDom = $('<p>').html(content.slice(0, 100))
               contentsDom.append(contentDom)
             }
           }
@@ -235,8 +232,8 @@ $(async () => {
         }
 
         if (item.sample) {
-          let mediaDom = $('<img>').attr({
-            'src': item.sample,
+          const mediaDom = $('<img>').attr({
+            src: item.sample
           }).addClass('gallery-image')
 
           if (galleryItem.displaytype === 'width') {
@@ -249,23 +246,44 @@ $(async () => {
           itemDom.append(mediaDom)
         }
 
-        let tagsDom = $('<div>').addClass('grid-tag')
-        let typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type).attr('href', 'javascript:void()')
+        const tagsDom = $('<div>').addClass('grid-tag')
+        const typeDom = $('<a>').addClass('badge badge-pill badge-success').html(item.type)
+          .attr('href', 'javascript:void()').click(function () {
+            data = filter(sheet, {
+              type: [$(this).attr('type')]
+            })
+
+            loadData(data)
+            $grid.masonry('reloadItems')
+            $grid.imagesLoaded(() => {
+              $grid.masonry('layout')
+            })
+          }).attr('type', item.type)
         tagsDom.append(typeDom)
 
         if (item.tag) {
-          let tags = item.tag.split(',')
+          const tags = item.tag.split(',')
 
-          for (let tag of tags) {
+          for (const tag of tags) {
             if (tag) {
-              let tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', 'javascript:void()')
+              const tagDom = $('<a>').addClass('badge badge-pill badge-info').html(tag)
+                .attr('href', 'javascript:void()').click(function () {
+                  data = filter(sheet, {
+                    tag: [$(this).attr('tag')]
+                  })
+                  loadData(data)
+                  $grid.masonry('reloadItems')
+                  $grid.imagesLoaded(() => {
+                    $grid.masonry('layout')
+                  })
+                }).attr('tag', tag)
               tagsDom.append(tagDom)
             }
           }
         }
 
         if (galleryItem.media) {
-          let linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html('原始檔案')
+          const linksDom = $('<div>').addClass('gallery-tag').append($('<a>').addClass('badge badge-pill badge-info').html('原始檔案')
             .attr('href', galleryItem.media)
             .attr('target', '_blank'))
           itemDom.append(linksDom)
@@ -276,14 +294,14 @@ $(async () => {
 
         $('.gallery').append(itemDomBorder)
         if (galleryItem.description) {
-          let description = $('<div>').addClass('gallery-description').append($('<p>').html(galleryItem.description))
+          const description = $('<div>').addClass('gallery-description').append($('<p>').html(galleryItem.description))
           $('.gallery').append(description)
         }
       }
 
       itemDomBorder.click(function () {
-        let hasClicked = $(this).hasClass('clicked')
-        let key = $(this).attr('key')
+        const hasClicked = $(this).hasClass('clicked')
+        const key = $(this).attr('key')
         clickedItem = $(this)
         if (hasClicked) {
           loadGallery(false)
@@ -304,29 +322,27 @@ $(async () => {
 
       // $('.grid').append(itemDomBorder.append(itemDom))
       $('.grid').append(itemDomBorder)
-
     }
 
     items = $('.grid-item')
   }
 
-  let loadGallery = (mode) => {
+  const loadGallery = (mode) => {
     if (mode !== status.gallery) {
       if (mode) {
         $('#grid').addClass('grid-move')
         $('.gallery').addClass('gallery-show')
         $('.grid-block').css({
           height: $('.grid').height(),
-          display: 'block',
+          display: 'block'
         })
         status.gallery = true
-
       } else {
         $('#grid').removeClass('grid-move')
         $('.gallery').removeClass('gallery-show')
         $('.grid-block').css({
           height: 0,
-          display: 'none',
+          display: 'none'
         })
 
         status.gallery = false
@@ -336,15 +352,13 @@ $(async () => {
         $grid.masonry('layout')
       }, 500)
     }
-
   }
 
-  let display = () => {
-    let heightStart = window.scrollY
-    let heightEnd = window.scrollY + window.innerHeight
+  const display = () => {
+    const heightEnd = window.scrollY + window.innerHeight
 
     items.each((num, item) => {
-      let offset = $(item).offset()
+      const offset = $(item).offset()
 
       if (offset.top <= heightEnd && !$(item).hasClass('shown')) {
         $(item).addClass('shown')
@@ -352,7 +366,7 @@ $(async () => {
     })
   }
 
-  let loading = (mode) => {
+  const loading = (mode) => {
     if (mode) {
       $('.loading').removeClass('hidden').addClass('shown')
       $('footer').removeClass('shown').addClass('hidden')
@@ -362,13 +376,12 @@ $(async () => {
     }
   }
 
-  function shuffle(array) {
+  function shuffle (array) {
     let temporaryValue, randomIndex
     let currentIndex = array.length
 
     // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
+    while (currentIndex !== 0) {
       // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex)
       currentIndex -= 1
@@ -382,32 +395,30 @@ $(async () => {
     return array
   }
 
-
   let data = sheet
 
   // 接 word cloud 搜尋
   if (location.hash) {
-    let s = location.hash.replace('#', '')
-    let arr = decodeURI(s).split(',')
+    const s = location.hash.replace('#', '')
+    const arr = decodeURI(s).split(',')
     data = filter(sheet, {
       jiebatags: arr
     })
-
   }
 
   loadData(data)
 
-  let titleArr = []
-  let tagMap = {}
-  for (let item of sheet) {
+  const titleArr = []
+  const tagMap = {}
+  for (const item of sheet) {
     if (item.title) {
       titleArr.push(item.title)
     }
 
     if (item.tag) {
-      let tags = item.tag.split(',')
+      const tags = item.tag.split(',')
 
-      for (let tag of tags) {
+      for (const tag of tags) {
         if (tag) {
           tagMap[tag] = false
         }
@@ -415,17 +426,17 @@ $(async () => {
     }
   }
 
-  let filterArr = ['照片', '詩作', '書法', '文章', '全部']
+  const filterArr = ['照片', '詩作', '書法', '文章', '全部']
 
-  let labelItem= $('<label>').addClass('btn btn-outline-success dropdown-btn')
-  let inputItem = $('<input>').attr({
+  const labelItem = $('<label>').addClass('btn btn-outline-success dropdown-btn')
+  const inputItem = $('<input>').attr({
     type: 'checkbox',
-    autocomplete: 'off',
+    autocomplete: 'off'
   })
 
-  for (let key of filterArr) {
-    let label = labelItem.clone()
-    let item = inputItem.clone()
+  for (const key of filterArr) {
+    const label = labelItem.clone()
+    const item = inputItem.clone()
     if (key === '全部') {
       label.addClass('all')
     }
@@ -433,22 +444,22 @@ $(async () => {
     label.text(key)
     label.click(function () {
       let data = sheet
-      let lists = $('.dropdown-btn.active')
-      let selected = $(this).text()
+      const lists = $('.dropdown-btn.active')
+      const selected = $(this).text()
 
       if (selected === '全部') {
-        let lists = $('.dropdown-btn')
+        const lists = $('.dropdown-btn')
 
-        for (let list of lists) {
+        for (const list of lists) {
           $(list).addClass('active')
         }
       } else {
-        let type = []
-        for (let list of lists) {
+        const type = []
+        for (const list of lists) {
           type.push($(list).text())
         }
 
-        let sIndex = type.indexOf(selected)
+        const sIndex = type.indexOf(selected)
         if (sIndex === -1) {
           type.push(selected)
         } else {
@@ -457,7 +468,7 @@ $(async () => {
 
         if (type.length > 0 && type.indexOf('全部') === -1) {
           data = filter(sheet, {
-            type,
+            type
           })
         }
       }
@@ -473,17 +484,34 @@ $(async () => {
     $('.btn-group-toggle').append(label)
   }
 
-  let searchTitle = $('.typeahead-title')
-	searchTitle.typeahead({
-    source: titleArr,
-    autoSelect: true
+  $(document).on('keydown', 'form', function (event) {
+    return event.key !== 'Enter'
   })
 
-	searchTitle.change(function() {
-		let current = searchTitle.typeahead('getActive');
-		if (current && current === searchTitle.val()) {
-      let data = filter(sheet, {
-        title: [current],
+  const searchTitle = $('.typeahead-title')
+  const pool = {}
+  searchTitle.typeahead({
+    source: titleArr,
+    autoSelect: false,
+    matcher: function (item) {
+      if (item.toLowerCase().indexOf(this.query.toLowerCase()) === 0) {
+        if (pool[this.query.toLowerCase()]) {
+          pool[this.query.toLowerCase()].push(item)
+        } else {
+          pool[this.query.toLowerCase()] = [item]
+        }
+        return ~item.toLowerCase().indexOf(this.query.toLowerCase())
+      }
+    }
+  })
+
+  searchTitle.keyup((event) => {
+    const code = event.key
+
+    if (code === 'Enter') {
+      event.preventDefault()
+      const data = filter(sheet, {
+        title: pool[searchTitle.val()]
       })
       $('.dropdown-btn').removeClass('active')
 
@@ -492,25 +520,49 @@ $(async () => {
       $grid.imagesLoaded(() => {
         $grid.masonry('layout')
       })
-		}
-	});
+    }
+    return false
+  })
 
-  let tagArr = []
-  for (let tag in tagMap) {
+  searchTitle.change(function () {
+    const current = searchTitle.typeahead('getActive')
+    if (current && current.replace('\n', '') === searchTitle.val()) {
+      const data = filter(sheet, {
+        title: [current]
+      })
+      $('.dropdown-btn').removeClass('active')
+
+      loadData(data)
+      $grid.masonry('reloadItems')
+      $grid.imagesLoaded(() => {
+        $grid.masonry('layout')
+      })
+    }
+  })
+
+  // searchTitle.typeahead.render(function(ev, suggestion, b, c) {
+  // console.log(ev)
+  // console.log('Selection: ' + suggestion);
+  // console.log(b)
+  // console.log(c)
+  // });
+
+  const tagArr = []
+  for (const tag in tagMap) {
     tagArr.push(tag)
   }
 
-  let searchTag = $('.typeahead-tags')
-	searchTag.typeahead({
+  const searchTag = $('.typeahead-tags')
+  searchTag.typeahead({
     source: tagArr,
     autoSelect: true
   })
 
-	searchTag.change(function() {
-		let current = searchTag.typeahead('getActive');
-		if (current && current === searchTag.val()) {
-      let data = filter(sheet, {
-        tag: [current],
+  searchTag.change(function () {
+    const current = searchTag.typeahead('getActive')
+    if (current && current === searchTag.val()) {
+      const data = filter(sheet, {
+        tag: [current]
       })
       $('.dropdown-btn').removeClass('active')
 
@@ -519,13 +571,13 @@ $(async () => {
       $grid.imagesLoaded(() => {
         $grid.masonry('layout')
       })
-		}
-	});
+    }
+  })
 
   $('#search-clr').click(() => {
-    let lists = $('.search-input')
+    const lists = $('.search-input')
 
-    for (list of lists) {
+    for (const list of lists) {
       $(list).val('')
     }
     $('.dropdown-btn').removeClass('active')
@@ -538,10 +590,10 @@ $(async () => {
   })
 
   // init Masonry
-  $grid = $('.grid').masonry({
+  const $grid = $('.grid').masonry({
     itemSelector: '.grid-item',
     columnWidth: '.grid-sizer',
-    gutter: 4,
+    gutter: 4
     // fitWidth: true,
   }).on('layoutComplete', () => {
     loading(false)
@@ -563,6 +615,4 @@ $(async () => {
   $grid.imagesLoaded(() => {
     $grid.masonry('layout')
   })
-
-  window.grid = $grid
 })

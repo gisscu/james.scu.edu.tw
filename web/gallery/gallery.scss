@@ -400,11 +400,15 @@ footer {
   border: none;
   outline: none !important;
   filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+  z-index: 1;
 
   &:focus {
     outline: !important;
   }
 
+  &:hover {
+    background: #dae0e5 !important;
+  }
 }
 .gallery-close span {
   position: absolute;
@@ -440,10 +444,6 @@ footer {
   animation-fill-mode: forwards;
 }
 
-.gallery-close.on:hover span::before {
-  width: 100%;
-  transition: all 0.3s linear;
-}
 .gallery-close.on span:nth-child(1) {
   animation: span-first-on 0.5s ease-in-out;
   animation-fill-mode: forwards;

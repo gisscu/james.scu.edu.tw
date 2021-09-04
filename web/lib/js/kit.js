@@ -1,12 +1,12 @@
 const gsheet = async (sheetId, tabNum) => {
-  let sheetData = []
-	let json = await $.get(`https://spreadsheets.google.com/feeds/list/${sheetId}/${tabNum}/public/full?alt=json`)
-  let fmtJSON = (data) => {
-    let obj = {}
+  const sheetData = []
+  const json = await $.get(`https://spreadsheets.google.com/feeds/list/${sheetId}/${tabNum}/public/full?alt=json`)
+  const fmtJSON = (data) => {
+    const obj = {}
 
-    for (let key in data) {
+    for (const key in data) {
       if (key.match('gsx')) {
-        let keyName = key.replace('gsx$', '')
+        const keyName = key.replace('gsx$', '')
 
         obj[keyName] = data[key].$t
       }
@@ -19,18 +19,17 @@ const gsheet = async (sheetId, tabNum) => {
     sheetData.push(fmtJSON(data))
   })
 
-
   return sheetData
 }
 
 const filter = (sheet, tags) => {
-  let fmtSheet = []
+  const fmtSheet = []
   sheet.forEach((item) => {
     let status = false
 
-    for (let key in tags) {
+    for (const key in tags) {
       if (item[key]) {
-        let arr = item[key].split(',')
+        const arr = item[key].split(',')
         tags[key].forEach((tag) => {
           if (arr.indexOf(tag) !== -1) {
             status = true

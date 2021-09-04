@@ -1,41 +1,81 @@
 $(async () => {
-  let canvas = $('#viewport')[0]
-  let ctx = canvas.getContext('2d')
-  let gfx = arbor.Graphics(canvas)
+  const canvas = $('#viewport')[0]
+  const ctx = canvas.getContext('2d')
+  const gfx = arbor.Graphics(canvas)
+  const color = {
+    a: '#e9ecef', // background
+    b: '#1A2330', // node fill
+    c: '#AD4040', // cneter node
+    e: '#F99F00', // focus
+    f: '#2283EB' // highlight
+  }
+  const config = {
+    node: {
+      width: 30,
+      alpha: 1,
+      font: {
+        name: 'Noto Sans',
+        size: 14
+      },
+      scale: {
+        minNode: 25,
+        maxNode: 300,
+        minSize: 0.4,
+        maxSize: 1
+      }
+    },
+    line: {
+      width: 0.5,
+      alpha: 0.3,
+      scale: 0.3
+    }
+  }
+  const status = {
+    focusNode: null,
+    getSource: false,
+    info: true
+  }
+
   let particleSystem
-  let left, top
-  let lockNode = { x: 0, y: 0 }
-  let Renderer = () => {
-    let that = {
-      init: function (system) {
+
+  const setCanvasSize = () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight - $('main').offset().top
+  }
+
+  const renderer = () => {
+    const that = {
+      init: (system) => {
         particleSystem = system
 
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
+        setCanvasSize()
         particleSystem.screenSize(canvas.width, canvas.height)
-        particleSystem.screenPadding(0)
+        particleSystem.screenPadding(100)
 
         that.initMouseHandling()
         init()
       },
 
-      redraw: function () {
-        ctx.fillStyle = '#e9ecef'
+      redraw: () => {
+        ctx.fillStyle = color.a
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-        particleSystem.eachEdge(function (edge, pt1, pt2) {
-          let source = edge.source.name
-          let target = edge.target.name
-          for (let line of edgeRule[source][target].style) {
+        particleSystem.eachEdge((edge, pt1, pt2) => {
+          const source = edge.source.name
+          const target = edge.target.name
+          for (const line of edgeRule[source][target].style) {
             if (line) {
-
-              let alpha = Math.floor((line.alpha * edge.target.data.alpha > 1 ? 1 : line.alpha * edge.target.data.alpha) * 255).toString(16)
+              let alpha = Math.floor(
+                (line.alpha * edge.target.data.alpha > 1 ? 1 : line.alpha * edge.target.data.alpha) * 255
+              ).toString(16)
               alpha = alpha.length < 2 ? `0${alpha}` : alpha
 
               ctx.strokeStyle = `${line.color}${alpha}`
               ctx.lineWidth = line.width
               ctx.beginPath()
-              // TODO: multicolor line
+
+              // TODO: multiline
+              // 偏移
               ctx.moveTo(pt1.x, pt1.y)
               ctx.lineTo(pt2.x, pt2.y)
               ctx.stroke()
@@ -43,51 +83,56 @@ $(async () => {
           }
         })
 
-        particleSystem.eachNode(function (node, pt) {
+        particleSystem.eachNode((node, pt) => {
           if (node.data.alpha > 0) {
-            for (let circle of nodeRule[node.name].style) {
+            for (const circle of nodeRule[node.name].style) {
               if (circle) {
-                let w = circle.width
-                gfx.rect(pt.x - w/2, pt.y - w/2, w, w, w/1.8, {
+                const w = circle.width * node.data.scale
+                gfx.rect(pt.x - w / 2, pt.y - w / 2, w, w, w / 1.8, {
                   fill: circle.color,
-                  alpha: circle.alpha * node.data.alpha,
+                  alpha: circle.alpha * node.data.alpha
                 })
               }
             }
 
-            if (node.data.focus) {
-              node.p = lockNode
-            }
-
-            gfx.text(node.name, pt.x, pt.y+35, {
-              color: '#000000',
+            gfx.text(node.name, pt.x, pt.y + 35, {
+              color: color.b,
               align: 'center',
               alpha: node.data.alpha,
-              font: 'Noto Sans',
-              size: 14,
+              font: config.node.font.name,
+              size: config.node.font.size
             })
+
+            // 移動功能 badge
+            if (node.name === status.focusNode.name) {
+              $('.canvas-btn').css({
+                left: pt.x + 20,
+                top: pt.y + 35
+              })
+            }
           } else {
             particleSystem.pruneNode(node)
           }
         })
       },
 
-      initMouseHandling: function () {
+      initMouseHandling: () => {
         let dragged = null
 
-        let handler = {
-          clicked: function (e) {
-            let pos = $(canvas).offset()
-            let mouseP = arbor.Point(e.pageX - pos.left, e.pageY - pos.top)
+        const handler = {
+          clicked: (e) => {
+            const pos = $(canvas).offset()
+            const mouseP = arbor.Point(e.pageX - pos.left, e.pageY - pos.top)
             dragged = particleSystem.nearest(mouseP)
 
             if (dragged && dragged.node !== null && dragged.distance < 30) {
-              let p = particleSystem.fromScreen(mouseP)
-              lockNode = p
+              if (!status.getSource) {
+                addCanvasBtn(e.pageX + 30, e.pageY - 20, dragged.node.name)
+              } else {
+                $('.badge').removeClass('clicked')
+              }
 
-              addCanvasBtn(e.pageX + 30, e.pageY - 20)
-
-              dragged.node.fixed = true
+              // dragged.node.fixed = true
               dragged.node.mass = 10
 
               sys.eachNode((node) => {
@@ -98,20 +143,33 @@ $(async () => {
 
               dragged.node.data.focus = true
 
-              click(dragged.node, true)
+              if (!status.getSource) {
+                // status.focusNode = dragged.node.name
+
+                if (!edgeRule[dragged.node.name]) {
+                  $('.open-bage').show()
+                  $('.open').hide()
+                } else if (dragged.node.name === '徐震') {
+                  $('.open-bage').hide()
+                } else {
+                  $('.open-bage').show()
+                  $('.open').show()
+                }
+              }
+
+              click(dragged.node)
               $(canvas).bind('mousemove', handler.dragged)
               $(window).bind('mouseup', handler.dropped)
             }
 
             return false
           },
-          dragged: function (e) {
-            let pos = $(canvas).offset()
-            let s = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+          dragged: (e) => {
+            const pos = $(canvas).offset()
+            const s = arbor.Point(e.pageX - pos.left, e.pageY - pos.top)
 
             if (dragged && dragged.node !== null) {
-              let p = particleSystem.fromScreen(s)
-              lockNode = p
+              const p = particleSystem.fromScreen(s)
               dragged.node.p = p
               dragged.node.fixed = true
               dragged.node.mass = 10
@@ -119,12 +177,12 @@ $(async () => {
 
             return false
           },
-
-          dropped: function (e) {
+          dropped: (e) => {
             if (dragged && dragged.node !== null) {
               dragged.node.fixed = false
               dragged.node.mass = 1
               dragged = null
+
               $(canvas).unbind('mousemove', handler.dragged)
               $(window).unbind('mouseup', handler.dropped)
             }
@@ -136,53 +194,57 @@ $(async () => {
         $(canvas).mousedown(handler.clicked)
 
         $(canvas).mousemove((e) => {
-          let pos = $(canvas).offset()
-          let mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
-          let mouseNode = particleSystem.nearest(mouseP)
+          const pos = $(canvas).offset()
+          const mouseP = arbor.Point(e.pageX - pos.left, e.pageY - pos.top)
+          const mouseNode = particleSystem.nearest(mouseP)
 
           if (mouseNode && mouseNode.node !== null && mouseNode.distance < 30) {
-            move(mouseNode.node)
+            hoverNode(mouseNode.node)
           } else {
-            move(null)
+            hoverNode(null)
           }
         })
-      },
+      }
     }
     return that
   }
 
-
-  let nodeRule = {}
-  let edgeRule = {}
-  let arborData = {
+  const nodeRule = {}
+  const edgeRule = {}
+  const arborData = {
     nodes: {},
-    edges: {},
+    edges: {}
   }
 
-  let addNodeRule = (node, i) => {
+  const addNodeRule = (node, i) => {
     nodeRule[node.name] = {
       data: node,
-      alpha: 1,
-      style: [],
+      alpha: config.node.alpha,
+      style: []
     }
 
-    let style = {
-      color: '#4F4F4F',
-      width: 20,
-      alpha: 1,
+    const year = parseInt(node['碩士畢業年'])
+    if (year > 0) {
+      yearPool.push(parseInt(node['碩士畢業年']))
+    }
+
+    const style = {
+      color: color.b,
+      width: config.node.width,
+      alpha: config.node.alpha
     }
 
     if (i === 0) {
-      style.color = '#FF8B42'
-      style.width = 30
+      style.color = color.c // 徐震用
+      style.width = config.node.width * 1.5
     }
 
     nodeRule[node.name].style[3] = style
   }
 
-  let addEdgeRule = (edge) => {
-    let source = edge.source
-    let target = edge.target
+  const addEdgeRule = (edge) => {
+    const source = edge.source
+    const target = edge.target
     if (nodeRule[source] && nodeRule[target]) {
       if (!edgeRule[source]) {
         edgeRule[source] = {}
@@ -194,196 +256,227 @@ $(async () => {
 
       edgeRule[source][target] = {
         class: edge.class,
-        style: [],
+        style: []
       }
 
-      let style = {
-        color: '#4F4F4F',
-        width: 1,
-        alpha: 0.3,
+      let alpha = config.line.alpha
+      let width = config.line.width
+      const year = parseInt(nodeRule[target].data['碩士畢業年'])
+      if (year > 0) {
+        const scale = Math.max(...yearPool) - Math.min(...yearPool)
+        const diff = year - Math.min(...yearPool)
+        const min = config.line.scale
+
+        alpha += min - (min / scale) * diff
+        width += (min - (min / scale) * diff) * 4
+      }
+
+      const style = {
+        color: color.b,
+        width,
+        alpha
       }
 
       edgeRule[source][target].style[1] = style
     }
   }
 
-  let addNode = (name, opt) => {
-    let node = sys.addNode(name, {
+  const addNode = (name, opt) => {
+    const node = sys.addNode(name, {
       alpha: 0.01,
+      scale: 1,
       clicked: false,
       ...opt
     })
 
     sys.tweenNode(node, 0.5, {
-      alpha: 1,
+      alpha: 1
     })
+
+    if (edgeRule[name] && Object.keys(edgeRule[name]).length > 0) {
+      nodeRule[name].style[4] = {
+        color: color.a,
+        width: nodeRule[name].style[3].width / 2,
+        alpha: 1
+      }
+    }
 
     return node
   }
 
-  let addEdge = (source, target) => {
+  const addEdge = (source, target) => {
     sys.addEdge(source, target)
   }
 
-  let addNodeChild = (name) => {
+  const addNodeChild = (name, mode) => {
     sys.getNode(name).data.clicked = true
-
-    nodeRule[name].style[4] = {
-      color: '#FFF',
-      width: nodeRule[name].style[3].width / 2,
-      alpha: 1,
+    if (edgeRule[name] && Object.keys(edgeRule[name]).length > 0) {
+      sys.getNode(name).data.open = true
     }
 
-    for (let child in edgeRule[name]) {
+    nodeRule[name].style[4] = null
+
+    for (const child in edgeRule[name]) {
       if (!sys.getNode(child)) {
         addNode(child)
         addEdge(name, child)
+
+        if (mode) {
+          addNodeChild(child, true)
+        }
       }
     }
   }
 
-  let addNodeChildRecursion = (name) => {
-    for (let child in edgeRule[name]) {
+  const addNodeChildRecursion = (name) => {
+    for (const child in edgeRule[name]) {
       if (!sys.getNode(child)) {
         addNode(child)
         addEdge(name, child)
       }
 
       edgeRule[name][child].style[0] = {
-        color: '#ED3C07',
+        color: color.e,
         width: edgeRule[name][child].style[1].width * 3,
-        alpha: 0.6,
+        alpha: 0.6
       }
       addNodeChildRecursion(child)
     }
   }
 
-  let addNodeAllChildAndHighLight = (name) => {
+  const addNodeAllChildAndHighLight = (name) => {
     sys.getNode(name).data.clicked = true
-    for (let key1 in edgeRule) {
-      for (let key2 in edgeRule[key1]) {
+    for (const key1 in edgeRule) {
+      for (const key2 in edgeRule[key1]) {
         edgeRule[key1][key2].style[0] = null
       }
     }
 
-    nodeRule[name].style[4] = {
-      color: '#FFF',
-      width: nodeRule[name].style[3].width / 2,
-      alpha: 1,
-    }
+    nodeRule[name].style[4] = null
 
-    for (let child in edgeRule[name]) {
+    for (const child in edgeRule[name]) {
       if (!sys.getNode(child)) {
         addNode(child)
         addEdge(name, child)
       }
 
       edgeRule[name][child].style[0] = {
-        color: '#ED3C07',
+        color: color.e,
         width: edgeRule[name][child].style[1].width * 3,
-        alpha: 0.6,
+        alpha: 0.6
       }
       addNodeChildRecursion(child)
     }
   }
 
-  let removeNodeAllChild = (name) => {
+  const removeNodeAllChild = (name) => {
     sys.getNode(name).data.clicked = false
-    nodeRule[name].style[4] = null
+    sys.getNode(name).data.open = false
 
-    for (let child in edgeRule[name]) {
-      let node = sys.getNode(child)
+    for (const child in edgeRule[name]) {
+      const node = sys.getNode(child)
 
       if (node) {
         sys.tweenNode(node, 0.5, {
-          alpha: 0,
+          alpha: 0
         })
         removeNodeAllChild(node.name)
       }
     }
+
+    if (edgeRule[name] && Object.keys(edgeRule[name]).length > 0) {
+      nodeRule[name].style[4] = {
+        color: color.a,
+        width: nodeRule[name].style[3].width / 2,
+        alpha: 1
+      }
+    }
   }
 
-  let status = 0
-  let nowNode
-  let click = (node, mode) => {
+  const click = (node, st) => {
     $('#child').removeClass('btn-warning').addClass('btn-outline-warning')
-    if (status) {
+    if (status.getSource) {
       selectGetSourceTarget(node.name)
     } else {
-      for (let key in nodeRule) {
+      for (const key in nodeRule) {
         nodeRule[key].style[2] = null
       }
 
       nodeRule[node.name].style[2] = {
-        color: '#ED3C07',
+        color: color.e,
         width: nodeRule[node.name].style[3].width * 1.3,
-        alpha: 1,
+        alpha: 1
       }
 
       node.data.highlight = false
 
-      if (mode) {
-        loadGallery(true)
-        openGallery({
-          name: node.name,
-          description: nodeRule[node.name].data.description,
-          class: [
-            nodeRule[node.name].data['現職'],
-            nodeRule[node.name].data['經歷'],
-          ],
-          eduItems: [
-            [
-              nodeRule[node.name].data['學士'],
-              nodeRule[node.name].data['學士系所'],
-              nodeRule[node.name].data['學士畢業年'],
-            ],
-            [
-              nodeRule[node.name].data['碩士'],
-              nodeRule[node.name].data['碩士系所'],
-              nodeRule[node.name].data['碩士畢業年'],
-              nodeRule[node.name].data['碩士論文'],
-            ],
-            [
-              nodeRule[node.name].data['博士'],
-              nodeRule[node.name].data['博士系所'],
-              nodeRule[node.name].data['博士畢業年'],
-              nodeRule[node.name].data['博士論文'],
-            ]
-          ]
-        })
+      if (st) {
+        loadGallery(false)
+      } else {
+        loadGallery(status.info)
       }
 
-      nowNode = node
+      selectGetSourceTarget('徐震')
+
+      openGallery({
+        name: node.name,
+        description: nodeRule[node.name].data.description,
+        class: [
+          nodeRule[node.name].data['現職'],
+          nodeRule[node.name].data['經歷']
+        ],
+        eduItems: [
+          [
+            nodeRule[node.name].data['學士'],
+            nodeRule[node.name].data['學士系所'],
+            nodeRule[node.name].data['學士畢業年']
+          ],
+          [
+            nodeRule[node.name].data['碩士'],
+            nodeRule[node.name].data['碩士系所'],
+            nodeRule[node.name].data['碩士畢業年'],
+            nodeRule[node.name].data['碩士論文']
+          ],
+          [
+            nodeRule[node.name].data['博士'],
+            nodeRule[node.name].data['博士系所'],
+            nodeRule[node.name].data['博士畢業年'],
+            nodeRule[node.name].data['博士論文']
+          ]
+        ]
+      })
+
+      status.focusNode = node
     }
   }
 
-  let highlight = (nodes) => {
-    for (let node in nodeRule) {
+  const highlight = (nodes) => {
+    for (const node in nodeRule) {
       nodeRule[node].style[0] = null
     }
 
-    for (let node of nodes) {
-      let path = search.pathTo('徐震', node.name)
+    for (const node of nodes) {
+      const path = search.pathTo('徐震', node.name)
 
       path.forEach((p, i) => {
         if (i > 0 && edgeRule[path[i - 1]][p] && !sys.getNode(p)) {
           addNode(p, {
-            highlight: true,
+            highlight: true
           })
           addEdge(path[i - 1], p)
         }
       })
 
       nodeRule[node.name].style[0] = {
-        color: '#BF00FF',
+        color: color.f,
         width: nodeRule[node.name].style[3].width * 1.3,
-        alpha: 1,
+        alpha: 0.9
       }
     }
   }
 
-  let removeAllHighLight = () => {
-    for (let node in nodeRule) {
+  const removeAllHighLight = () => {
+    for (const node in nodeRule) {
       if (nodeRule[node].style[0]) {
         nodeRule[node].style[0] = null
       }
@@ -392,34 +485,57 @@ $(async () => {
     sys.eachNode((node) => {
       if (node.data.highlight) {
         sys.tweenNode(node, 0.5, {
-          alpha: 0,
+          alpha: 0
         })
       }
     })
   }
 
-  let move = (node) => {
-    for (let key in nodeRule) {
+  const resizeNode = () => {
+    let nodeNum = 0
+    const pool = []
+    sys.eachNode((node) => {
+      nodeNum += 1
+      pool.push(node)
+    })
+
+    const scale = nodeNum > config.node.scale.minNode
+      ? nodeNum > config.node.scale.maxNode
+          ? config.node.scale.minSize
+          : 1 - (nodeNum / config.node.scale.maxNode * (1 - config.node.scale.minSize))
+      : config.node.scale.maxSize
+    console.log(scale)
+
+    for (const node of pool) {
+      sys.tweenNode(node, 0.5, {
+        scale
+      })
+    }
+  }
+
+  const hoverNode = (node) => {
+    for (const key in nodeRule) {
       nodeRule[key].style[1] = null
     }
+
     sys.eachNode((node) => {
       node.data.alpha = 1
     })
 
     if (node) {
       nodeRule[node.name].style[1] = {
-        color: '#ED3C07',
+        color: color.e,
         width: nodeRule[node.name].style[3].width * 1.3,
-        alpha: 1,
+        alpha: 1
       }
       node.data.alpha = 3
     }
   }
 
-  let getSource = (target, source) => {
-    let path = search.pathTo(target, source)
-    for (let key1 in edgeRule) {
-      for (let key2 in edgeRule[key1]) {
+  const getSource = (target, source, mode) => {
+    const path = search.pathTo(target, source)
+    for (const key1 in edgeRule) {
+      for (const key2 in edgeRule[key1]) {
         edgeRule[key1][key2].style[0] = null
       }
     }
@@ -427,16 +543,16 @@ $(async () => {
 
     path.forEach((p1, i) => {
       if (i > 0) {
-        let p2 = path[i - 1]
+        const p2 = path[i - 1]
 
-        for (let key1 in edgeRule) {
-          for (let key2 in edgeRule[key1]) {
+        for (const key1 in edgeRule) {
+          for (const key2 in edgeRule[key1]) {
             if ((key1 === p1 && key2 === p2) ||
                 (key1 === p2 && key2 === p1)) {
               edgeRule[key1][key2].style[0] = {
-                color: '#ED3C07',
+                color: color.e,
                 width: edgeRule[key1][key2].style[1].width * 5,
-                alpha: 0.6,
+                alpha: 0.6
               }
             }
           }
@@ -445,90 +561,100 @@ $(async () => {
     })
   }
 
-  let selectGetSourceTarget = (target) => {
-    for (let key in nodeRule) {
+  const selectGetSourceTarget = (target) => {
+    for (const key in nodeRule) {
       if (nodeRule[key].style[2]) {
         getSource(target, key)
-        status = 0
+        status.getSource = 0
         $('#source').removeClass('btn-danger').addClass('btn-outline-danger')
       }
     }
   }
 
-  let addCanvasBtn = (x, y) => {
-    let tags2Dom = $('<div>').addClass('grid-tag2')
-    let tag1Dom = $('<a>').addClass('badge badge-pill badge-light').html(`開闔`).attr('href', '#').click(function () {
-      $(this).toggleClass('clicked')
-      if (!nowNode.data.clicked) {
-        addNodeChild(nowNode.name)
-      } else if (!nowNode.data.force){
-        removeNodeAllChild(nowNode.name)
+  const addCanvasBtn = (x, y, name) => {
+    const tags2Dom = $('<div>').addClass('grid-tag2 open-bage')
+    const tag1Dom = $('<a>').addClass('badge badge-pill badge-light open open1').html('開闔').attr('href', '#').click(function () {
+      if (!status.focusNode.data.clicked) {
+        addNodeChild(status.focusNode.name)
+        $(this).addClass('clicked')
+      } else if (!status.focusNode.data.center) {
+        removeNodeAllChild(status.focusNode.name)
+        $(this).removeClass('clicked')
       }
     })
 
-    let tag2Dom = $('<a>').addClass('badge badge-pill badge-light').html(`朔源`).attr('href', '#').click(function () {
-      $(this).toggleClass('clicked')
-      status = 1
+    if (sys.getNode(name).data.open) {
+      tag1Dom.addClass('clicked')
+    }
+
+    const tag2Dom = $('<a>').addClass('badge badge-pill badge-light').html('朔源').attr('href', '#').click(function () {
+      if (status.getSource) {
+        status.getSource = false
+        $(this).removeClass('clicked')
+      } else {
+        status.getSource = true
+        $(this).addClass('clicked')
+      }
     })
 
-    let tag3Dom = $('<a>').addClass('badge badge-pill badge-light').html(`桃李`).attr('href', '#').click(function () {
-      $(this).toggleClass('clicked')
+    const tag3Dom = $('<a>').addClass('badge badge-pill badge-light open').html('桃李').attr('href', '#').click(function () {
+      $('.open1').addClass('clicked')
+      addNodeChild(status.focusNode.name, true)
     })
+
     tags2Dom.append(tag1Dom)
     tags2Dom.append(tag2Dom)
     tags2Dom.append(tag3Dom)
 
     $('.canvas-btn').remove()
-    let canvasBtn = $('<div>').addClass('canvas-btn').css({
+    const canvasBtn = $('<div>').addClass('canvas-btn').css({
       top: y,
-      left: x,
+      left: x
     })
     canvasBtn.append(tags2Dom)
 
     $('.canvas').append(canvasBtn)
   }
 
-
-  window.getSource = getSource
-
-  let init = () => {
-    let name = '徐震'
-    let node = addNode(name, {
-      force: true,
+  const init = () => {
+    const name = '徐震'
+    const node = addNode(name, {
+      center: true
     })
 
     addNodeChild(name)
 
-    click(node, false)
+    click(node)
+    setInterval(resizeNode, 1000)
 
-    let keyword = {
+    const keyword = {
       name: search.keyword('name'),
       school: search.keyword('碩士'),
       major: search.keyword('碩士系所'),
-      year: search.keyword('碩士畢業年'),
+      year: search.keyword('碩士畢業年')
     }
 
-    let tName = $(".typeahead-name")
+    const tName = $('.typeahead-name')
 
     tName.typeahead({
-			source: keyword.name.map((name) => {
+      source: keyword.name.map((name) => {
         return {
-          name,
+          name
         }
       }),
-			autoSelect: true
-		})
+      autoSelect: true
+    })
 
     $('#child').click(() => {
       if ($('#child').hasClass('btn-warning')) {
-        for (let key1 in edgeRule) {
-          for (let key2 in edgeRule[key1]) {
+        for (const key1 in edgeRule) {
+          for (const key2 in edgeRule[key1]) {
             edgeRule[key1][key2].style[0] = null
           }
         }
         $('#child').removeClass('btn-warning').addClass('btn-outline-warning')
       } else {
-        for (let key in nodeRule) {
+        for (const key in nodeRule) {
           if (nodeRule[key].style[2]) {
             addNodeAllChildAndHighLight(key)
             $('#child').removeClass('btn-outline-warning').addClass('btn-warning')
@@ -537,60 +663,58 @@ $(async () => {
       }
     })
 
-
     $('#source2').click(() => {
-      status = 1
+      status.getSource = 1
       $('#source').removeClass('btn-outline-danger').addClass('btn-danger')
     })
 
-    let doSearch = function () {
-      let current = $(this).typeahead('getActive')
+    const doSearch = function () {
+      const current = $(this).typeahead('getActive')
       if (current && current.name === $(this).val()) {
-        let res = search.filter({
-          '碩士': $('.typeahead-school').val(),
-          '碩士系所': $('.typeahead-major').val(),
-          '碩士畢業年': $('.typeahead-year').val(),
+        const res = search.filter({
+          碩士: $('.typeahead-school').val(),
+          碩士系所: $('.typeahead-major').val(),
+          碩士畢業年: $('.typeahead-year').val()
         })
         highlight(res)
       }
     }
 
-    $(".typeahead-school").typeahead({
-			source: keyword.school.map((school) => {
+    $('.typeahead-school').typeahead({
+      source: keyword.school.map((school) => {
         return {
-          name: school,
+          name: school
         }
       }),
-			autoSelect: true
-		}).change(doSearch)
+      autoSelect: true
+    }).change(doSearch)
 
-    $(".typeahead-major").typeahead({
-			source: keyword.major.map((major) => {
+    $('.typeahead-major').typeahead({
+      source: keyword.major.map((major) => {
         return {
-          name: major,
+          name: major
         }
       }),
-			autoSelect: true
-		}).change(doSearch)
+      autoSelect: true
+    }).change(doSearch)
 
-    $(".typeahead-year").typeahead({
-			source: keyword.year.map((year) => {
+    $('.typeahead-year').typeahead({
+      source: keyword.year.map((year) => {
         return {
-          name: year,
+          name: year
         }
       }),
-			autoSelect: true
-		}).change(doSearch)
-
+      autoSelect: true
+    }).change(doSearch)
 
     $('#search-clr').click(() => {
       removeAllHighLight()
     })
 
-    tName.change(function() {
-      let current = tName.typeahead("getActive")
-      if (current && current.name == tName.val()) {
-        let res = search.filter({
+    tName.change(() => {
+      const current = tName.typeahead('getActive')
+      if (current && current.name === tName.val()) {
+        const res = search.filter({
           name: tName.val()
         })
 
@@ -599,16 +723,15 @@ $(async () => {
     })
   }
 
-  // let nodeData = await gsheet('16Ya5soMF7rCkBd-jeSPnpsmiuG5GpSKcwEtPnDXXSvk', 2)
-  // let edgeData = await gsheet('16Ya5soMF7rCkBd-jeSPnpsmiuG5GpSKcwEtPnDXXSvk', 3)
-  let nodeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 2)
-  let edgeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 3)
+  const nodeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 2)
+  const edgeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 3)
+  const yearPool = []
 
   search.init(nodeData, edgeData)
   nodeData.map(addNodeRule)
   edgeData.map(addEdgeRule)
 
-  let sys = arbor.ParticleSystem()
+  const sys = arbor.ParticleSystem()
   sys.parameters({
     stiffness: 100,
     repulsion: 10,
@@ -616,13 +739,13 @@ $(async () => {
     gravity: true,
     fps: 30,
     dt: 0.02,
-    precision: 0.5,
+    precision: 0.5
   })
-  sys.renderer = Renderer('#viewport')
+  sys.renderer = renderer('#viewport')
   sys.graft(arborData)
 
-  let loading = (status) => {
-    if (status) {
+  const loading = (st) => {
+    if (st) {
       $('.loading').removeClass('hidden').addClass('shown')
       $('.canvas').removeClass('shown').addClass('hidden')
       $('footer').removeClass('shown').addClass('hidden')
@@ -636,98 +759,88 @@ $(async () => {
   loading()
 
   $(window).resize(() => {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    setCanvasSize()
     sys.screenSize(canvas.width, canvas.height)
   })
 
-  let loadGallery = (mode) => {
-    if (mode !== status.gallery) {
-      if (mode) {
-        $('.gallery').addClass('gallery-show')
-      } else {
-        $('.gallery').removeClass('gallery-show')
-      }
+  const loadGallery = (mode) => {
+    if (mode) {
+      $('.gallery').addClass('gallery-show')
+    } else {
+      $('.gallery').removeClass('gallery-show')
     }
   }
 
-  let openGallery = (item) => {
+  const openGallery = (item) => {
     $('.gallery').html('')
-    let itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
-
-    // name: node.name,
-    // description: nodeRule[node.name].data.description,
-    // eduItems: [
-      // [
-        // nodeRule[node.name].data['學士'],
-        // nodeRule[node.name].data['學士系所'],
-        // nodeRule[node.name].data['學士畢業年'],
-
+    const itemDomBorder = $('<div>').addClass('gallery-content').addClass('center')
     itemDomBorder.addClass('gallery-no-description')
 
-    let itemDom = $('<div>').addClass('gallery-body')
-    let close = $('<button>').addClass('gallery-close')
-      .addClass('on').append($('<span>')).append($('<span>')).append($('<span>')).click(function () {
-        loadGallery(false)
-    })
+    const itemDom = $('<div>').addClass('gallery-body')
+    const close = $('<div>').addClass('gallery-close').click(function () {
+      if (status.info) {
+        $(this).find('i').removeClass('left').addClass('right')
+      } else {
+        $(this).find('i').removeClass('right').addClass('left')
+      }
+      status.info = !status.info
+      loadGallery(status.info)
+    }).append($('<i>').addClass('arrow left'))
 
     itemDom.append(close)
     itemDom.addClass('grid-type4')
     itemDomBorder.addClass('full-w')
 
     if (item.name) {
-      let titleDom = $('<h5>').addClass('gallery-title').html(item.name)
+      const titleDom = $('<h5>').addClass('gallery-title').html(item.name)
 
       itemDom.append(titleDom)
     }
 
+    const tagsDom = $('<div>').addClass('grid-tag')
 
-    let tagsDom = $('<div>').addClass('grid-tag')
-
-    for (let tag of item.eduItems) {
+    for (const tag of item.eduItems) {
       if (tag[0] || tag[1] || tag[2]) {
-        let tagDom = $('<a>').addClass('badge badge-pill badge-secondary').html(`${tag[0]} ${tag[1]} ${tag[2]}`).attr('href', '#')
+        const tagDom = $('<a>').addClass('badge badge-pill badge-secondary').html(`${tag[0]} ${tag[1]} ${tag[2]}`).attr('href', '#')
         tagsDom.append(tagDom)
       }
     }
-    let class0Arr = item.class[0].split('\n')
+    const class0Arr = item.class[0].split('\n')
     let linksDom = $('<div>').addClass('gallery-tag')
-    for (let tag of class0Arr) {
+    for (const tag of class0Arr) {
       linksDom.append($('<a>').addClass('badge badge-pill badge-primary').html(tag).attr('href', '#'))
     }
     itemDom.append(linksDom)
 
-    let class1Arr = item.class[1].split('\n')
+    const class1Arr = item.class[1].split('\n')
     linksDom = $('<div>').addClass('gallery-tag')
-    for (let tag of class1Arr) {
+    for (const tag of class1Arr) {
       linksDom.append($('<a>').addClass('badge badge-pill badge-info').html(tag).attr('href', '#'))
     }
     itemDom.append(linksDom)
 
-
     // let tag2Dom = $('<a>').addClass('badge badge-pill badge-success').html(`桃李`).attr('href', '#')
     // tags2Dom.append(tag2Dom).click(() => {
-      // status = 1
+    // status.getSource = 1
     // })
     // let tag3Dom = $('<a>').addClass('badge badge-pill badge-success').html(`朔源`).attr('href', '#').click(() => {
-      // for (let key in nodeRule) {
-        // if (nodeRule[key].style[2]) {
-          // getSource('徐震', key)
-        // }
-      // }
+    // for (let key in nodeRule) {
+    // if (nodeRule[key].style[2]) {
+    // getSource('徐震', key)
+    // }
+    // }
     // })
     // tags2Dom.append(tag3Dom)
-    let contentsDom = $('<div>').addClass('grid-content')
+    const contentsDom = $('<div>').addClass('grid-content')
 
-    let contents = item.description.split('\n')
+    const contents = item.description.split('\n')
 
-    for (let content of contents) {
+    for (const content of contents) {
       if (content) {
-        let contentDom = $('<p>').html(content.slice(0, 100))
+        const contentDom = $('<p>').html(content.slice(0, 100))
         contentsDom.append(contentDom)
       }
     }
-
 
     itemDom.append(tagsDom)
     // itemDom.append(tags2Dom)
