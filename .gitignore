@@ -1,9 +1,6 @@
 node_modules
 web/gallery/sample/
 web/gallery/thumbnail/
-script/credentials.json
-script/gwtracker-sheet-7c4c126cc922.json
-script/config.js
-script/result.txt
-script/word
-usr/
+map.json
+result.txt
+word
