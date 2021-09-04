@@ -723,8 +723,8 @@ $(async () => {
     })
   }
 
-  const nodeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 2)
-  const edgeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 3)
+  const nodeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 'sna')
+  const edgeData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 'snaclass')
   const yearPool = []
 
   search.init(nodeData, edgeData)

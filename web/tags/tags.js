@@ -1,5 +1,5 @@
 $(async () => {
-  const tagData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 5)
+  const tagData = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 'tags')
 
   const loading = (status) => {
     if (status) {

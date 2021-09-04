@@ -1,22 +1,9 @@
-const gsheet = async (sheetId, tabNum) => {
+const gsheet = async (sheetId, tabName) => {
   const sheetData = []
-  const json = await $.get(`https://spreadsheets.google.com/feeds/list/${sheetId}/${tabNum}/public/full?alt=json`)
-  const fmtJSON = (data) => {
-    const obj = {}
+  const json = await $.get(`https://gis.scu.edu.tw/jsonapi?id=${sheetId}&sheet=${tabName}`)
 
-    for (const key in data) {
-      if (key.match('gsx')) {
-        const keyName = key.replace('gsx$', '')
-
-        obj[keyName] = data[key].$t
-      }
-    }
-
-    return obj
-  }
-
-  json.feed.entry.map(data => {
-    sheetData.push(fmtJSON(data))
+  json.rows.map(data => {
+    sheetData.push(data)
   })
 
   return sheetData

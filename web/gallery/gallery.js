@@ -1,5 +1,5 @@
 $(async () => {
-  const sheet = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 4)
+  const sheet = await gsheet('1jg3z98J9T_RqnlZ-hIE4-Bsj5RnyPi0RIjdwhej2Hdo', 'gallery')
   let items
   const main = $('main')
   const body = $('html, body')
