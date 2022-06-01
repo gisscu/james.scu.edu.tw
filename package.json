@@ -11,7 +11,7 @@
     "google-spreadsheet": "^3.0.13",
     "googleapis": "^65.0.0",
     "pdf-parse": "^1.1.1",
-    "sharp": "^0.26.3"
+    "sharp": "^0.30.5"
   },
   "devDependencies": {
     "eslint": "^7.14.0",
